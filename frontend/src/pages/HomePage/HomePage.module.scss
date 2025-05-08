@@ -1,0 +1,11 @@
+.container  {
+    display: flex;
+    flex-direction: column;
+    min-height: 100px;
+    color: aqua;
+    .wrapper    {
+        margin: 0 auto;
+        width: 960px;
+        flex: 1;
+    }
+}

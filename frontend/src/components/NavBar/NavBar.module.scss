@@ -1,0 +1,56 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 20px;
+  background-color: #000;
+  border-bottom: 1px solid #ccc;
+}
+
+.nav_bar_menu {
+  display: flex;
+  align-items: center;
+  margin-right: 16px; // 👈 add space between menu and icon
+
+  img {
+    height: 30px;
+    width: auto;
+    cursor: pointer;
+  }
+}
+
+.nav_bar_icon {
+  display: flex;
+  align-items: center;
+
+  img {
+    height: 30px;
+    width: auto;
+    cursor: pointer;
+  }
+}
+
+.nav_bar_name {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+
+  li {
+    font-size: 18px;
+    font-weight: bold;
+  }
+}
+
+.nav_bar_profile {
+  display: flex;
+  align-items: center;
+
+  img {
+    height: 30px;
+    width: auto;
+    cursor: pointer;
+  }
+}
