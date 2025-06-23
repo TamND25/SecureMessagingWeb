@@ -5,6 +5,8 @@ const cors = require("cors");
 const sequelize = require("./config/db.config");
 const registerRoutes = require('./api/auth');
 const messageRoutes = require("./api/message");
+const userRoutes = require('./api/user');
+const friendshipRoutes = require('./api/friendship');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -12,6 +14,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(registerRoutes)
+
+app.use("/api/user", userRoutes);
+app.use('/api/friendship', friendshipRoutes);
 
 // Logs
 app.use((req, res, next) => {
@@ -24,13 +29,11 @@ app.use("/api/auth", registerRoutes);
 app.use("/api/message", messageRoutes);
 
 // Start Server
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log("Database synced");
-    app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Error syncing DB:", err);
-  });
+sequelize.authenticate()
+  .then(() => console.log('DB connected'))
+  .catch(err => console.error('DB connection error:', err));
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+

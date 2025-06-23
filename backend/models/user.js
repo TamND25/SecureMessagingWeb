@@ -1,7 +1,14 @@
 const { Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  class User extends Model {}
+  class User extends Model {
+    static associate(models) {
+      User.hasMany(models.Friendship, { foreignKey: 'requesterId', as: 'requestedFriends' });
+      User.hasMany(models.Friendship, { foreignKey: 'addresseeId', as: 'receivedFriends' });
+      User.hasMany(models.message, { foreignKey: 'senderId', as: 'sentMessages' });
+      User.hasMany(models.message, { foreignKey: 'receiverId', as: 'receivedMessages' });
+    }
+  }
 
   User.init(
     {
@@ -24,6 +31,7 @@ module.exports = (sequelize) => {
       sequelize,
       modelName: "User",
       tableName: "users",
+      timestamps: true,
     }
   );
 

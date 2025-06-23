@@ -1,11 +1,24 @@
-.container  {
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  .wrapper {
     display: flex;
-    flex-direction: column;
-    min-height: 100px;
-    color: aqua;
-    .wrapper    {
-        margin: 0 auto;
-        width: 960px;
-        flex: 1;
-    }
+    flex: 1;
+    height: 100%;
+  }
+
+  .chatArea {
+    flex: 1;
+    padding: 20px;
+    background-color: #fafafa;
+    overflow-y: auto;
+  }
+
+  .placeholder {
+    color: #777;
+    font-size: 1.2em;
+    padding-top: 50px;
+  }
 }
