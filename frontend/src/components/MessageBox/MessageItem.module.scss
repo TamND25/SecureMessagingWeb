@@ -1,6 +1,8 @@
 .messageRow {
   display: flex;
   margin: 10px 0;
+  position: relative; // Ensure stacking context
+  z-index: 0;
 }
 
 .sentRow {
@@ -29,6 +31,7 @@
   align-items: center;
   gap: 6px;
   position: relative;
+  z-index: 1;
 }
 
 .bubble {
@@ -54,6 +57,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  z-index: 999; // Force higher priority
 }
 
 .menuButton {
@@ -61,6 +65,7 @@
   border: none;
   font-size: 1.2em;
   cursor: pointer;
+  z-index: 999;
 }
 
 .dropdown {
@@ -71,7 +76,7 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  z-index: 100;
+  z-index: 9999; // 💥 MAXIMUM to override all UI (search bar, etc.)
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
@@ -120,7 +125,24 @@
 }
 
 .fileLink {
-  color: #0645ad;
+  color: #3f51b5;
   text-decoration: underline;
   font-weight: 500;
+  word-break: break-word;
+}
+
+.previewImage {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 10px;
+  margin-top: 5px;
+  z-index: 1;
+}
+
+.previewVideo {
+  max-width: 300px;
+  max-height: 200px;
+  margin-top: 5px;
+  border-radius: 10px;
+  z-index: 1;
 }

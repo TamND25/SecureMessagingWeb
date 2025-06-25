@@ -5,7 +5,7 @@ const User = db.user;
 const { Op } = require("sequelize");
 
 exports.sendMessage = async (req, res) => {
-  const { receiverId, groupId, content, timer } = req.body;
+  const { receiverId, groupId, content, timer, type } = req.body;
   const senderId = req.user.id;
 
   if (!content || (!receiverId && !groupId)) {
@@ -20,22 +20,62 @@ exports.sendMessage = async (req, res) => {
       content,
       timer,
       type: type || "text",
+      isEdited: false,
       deletedFor: [],
     });
 
-    res.status(201).json(message);
+    const sender = await User.findByPk(senderId);
+    const enrichedMessage = {
+      ...message.dataValues,
+      senderName: sender.username,
+    };
+
+    res.status(201).json(enrichedMessage);
   } catch (err) {
     console.error("Error sending message:", err);
     res.status(500).json({ error: "Failed to send message" });
   }
 };
 
+exports.uploadFile = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const senderId = req.user.id;
+  const { receiverId, groupId } = req.body;
+  const fileUrl = `/uploads/${req.file.filename}`;
+
+  try {
+    const message = await Message.create({
+      senderId,
+      receiverId,
+      groupId,
+      content: fileUrl,
+      type: "file",
+      isEdited: false,
+      deletedFor: [],
+    });
+
+    const sender = await User.findByPk(senderId);
+    const enrichedMessage = {
+      ...message.dataValues,
+      senderName: sender.username,
+    };
+
+    res.status(201).json({
+      message: "File uploaded and message sent",
+      messageData: enrichedMessage,
+    });
+  } catch (err) {
+    console.error("Upload failed:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+};
+
 exports.getConversation = async (req, res) => {
   const userId = req.user.id;
   const otherId = parseInt(req.params.userId);
-
-  console.log("Fetching conversation for", userId, "with", otherId);
-
 
   try {
     const messages = await Message.findAll({
@@ -45,25 +85,30 @@ exports.getConversation = async (req, res) => {
             [Op.or]: [
               { senderId: userId, receiverId: otherId },
               { senderId: otherId, receiverId: userId },
-            ]
+            ],
           },
           {
             [Op.or]: [
               { deletedFor: null },
-              { deletedFor: { [Op.not]: { [Op.contains]: [userId] } } }
-            ]
-          }
-        ]
+              { deletedFor: { [Op.not]: { [Op.contains]: [userId] } } },
+            ],
+          },
+        ],
       },
       order: [["createdAt", "ASC"]],
       include: [
         { model: User, as: "Sender", attributes: ["id", "username"] },
         { model: User, as: "Receiver", attributes: ["id", "username"] },
-        { model: Reaction, as: "Reactions" }
-      ]
+        { model: Reaction, as: "Reactions" },
+      ],
     });
 
-    res.json(messages);
+    const enrichedMessages = messages.map((msg) => ({
+      ...msg.dataValues,
+      senderName: msg.Sender?.username || "Unknown",
+    }));
+
+    res.json(enrichedMessages);
   } catch (err) {
     console.error("Error getting messages:", err);
     res.status(500).json({ error: "Failed to get messages" });
@@ -80,14 +125,22 @@ exports.getGroupMessages = async (req, res) => {
         groupId,
         [Op.or]: [
           { deletedFor: null },
-          { deletedFor: { [Op.notContains]: [userId] } }
-        ]
+          { deletedFor: { [Op.notContains]: [userId] } },
+        ],
       },
       order: [["createdAt", "ASC"]],
-      include: [{ model: Reaction, as: "Reactions" }]
+      include: [
+        { model: User, as: "Sender", attributes: ["id", "username"] },
+        { model: Reaction, as: "Reactions" },
+      ],
     });
 
-    res.json(messages);
+    const enrichedMessages = messages.map((msg) => ({
+      ...msg.dataValues,
+      senderName: msg.Sender?.username || "Unknown",
+    }));
+
+    res.json(enrichedMessages);
   } catch (err) {
     console.error("Error getting group messages:", err);
     res.status(500).json({ error: "Failed to get group messages" });
@@ -119,9 +172,6 @@ exports.editMessage = async (req, res) => {
 exports.softDelete = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
-
-  console.log("Before soft delete:", Message.deletedFor);
-
 
   try {
     const message = await Message.findByPk(id);
@@ -164,7 +214,7 @@ exports.reactToMessage = async (req, res) => {
   try {
     const [reaction, created] = await Reaction.findOrCreate({
       where: { messageId: id, userId },
-      defaults: { type }
+      defaults: { type },
     });
 
     if (!created) {
@@ -177,17 +227,4 @@ exports.reactToMessage = async (req, res) => {
     console.error("Error reacting to message:", err);
     res.status(500).json({ error: "Failed to react" });
   }
-};
-
-exports.uploadFile = (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-
-  const fileUrl = `/uploads/${req.file.filename}`;
-  res.status(200).json({
-    message: "File uploaded successfully",
-    fileUrl,
-    fileName: req.file.originalname,
-  });
 };

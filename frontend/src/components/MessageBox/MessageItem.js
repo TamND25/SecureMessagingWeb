@@ -42,39 +42,64 @@ const MessageItem = ({
     };
   }, []);
 
+  const renderFilePreview = (url) => {
+    const ext = url.split(".").pop().toLowerCase();
+    const fullUrl = url.startsWith("http")
+      ? url
+      : `http://localhost:5000${url}`;
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+      return <img src={fullUrl} alt="shared" className={styles.previewImage} />;
+    }
+    if (["mp4", "webm"].includes(ext)) {
+      return (
+        <video controls className={styles.previewVideo}>
+          <source src={fullUrl} type={`video/${ext}`} />
+        </video>
+      );
+    }
+    return (
+      <a
+        href={fullUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.fileLink}
+      >
+        📎 {url.split("/").pop()}
+      </a>
+    );
+  };
+
+  console.log("🔍 Message received in MessageItem:", message);
+  console.log("📎 Is this a file message?", message.type === "file", "Type:", message.type);
+
   return (
-    <div className={`${styles.messageRow} ${isSender ? styles.sentRow : styles.receivedRow}`}>
+    <div
+      className={`${styles.messageRow} ${
+        isSender ? styles.sentRow : styles.receivedRow
+      }`}
+    >
       <div className={styles.messageContainer}>
         <div className={styles.senderName}>
           {isSender ? "You" : message.senderName || "Friend"}
         </div>
 
         <div className={styles.messageContentWrapper}>
-          {/* Left message: menu on right */}
           {!isSender && (
             <>
               <div className={`${styles.bubble} ${styles.received}`}>
                 {isEditing ? (
                   <>
-                    <input value={text} onChange={(e) => setText(e.target.value)} />
+                    <input
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                    />
                     <button onClick={handleEditConfirm}>Save</button>
                     <button onClick={() => setIsEditing(false)}>Cancel</button>
                   </>
+                ) : message.type === "file" ? (
+                  renderFilePreview(message.content)
                 ) : (
-                  <span>
-                    {message.type === "file" ? (
-                      <a
-                        href={message.content}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.fileLink}
-                      >
-                        📎 {message.content.split("/").pop()}
-                      </a>
-                    ) : (
-                      message.content
-                    )}
-                  </span>
+                  <span>{message.content}</span>
                 )}
               </div>
               <div className={styles.menuWrapper}>
@@ -89,14 +114,15 @@ const MessageItem = ({
                 </button>
                 {isMenuOpen && (
                   <div className={`${styles.dropdown} ${styles.dropdownRight}`}>
-                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
+                    <div onClick={() => onDelete(message.id, false)}>
+                      Hide for Me
+                    </div>
                   </div>
                 )}
               </div>
             </>
           )}
 
-          {/* Right message: menu on left */}
           {isSender && (
             <>
               <div className={styles.menuWrapper}>
@@ -112,8 +138,12 @@ const MessageItem = ({
                 {isMenuOpen && (
                   <div className={`${styles.dropdown} ${styles.dropdownLeft}`}>
                     <div onClick={() => setIsEditing(true)}>Edit</div>
-                    <div onClick={() => onDelete(message.id, true)}>Delete for Everyone</div>
-                    <div onClick={() => setShowTimerInput((prev) => !prev)}>Self-destruct...</div>
+                    <div onClick={() => onDelete(message.id, true)}>
+                      Delete for Everyone
+                    </div>
+                    <div onClick={() => setShowTimerInput((prev) => !prev)}>
+                      Self-destruct...
+                    </div>
                     {showTimerInput && (
                       <div className={styles.timerInput}>
                         <input
@@ -127,32 +157,26 @@ const MessageItem = ({
                         <button onClick={handleSetTimer}>Start</button>
                       </div>
                     )}
-                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
+                    <div onClick={() => onDelete(message.id, false)}>
+                      Hide for Me
+                    </div>
                   </div>
                 )}
               </div>
               <div className={`${styles.bubble} ${styles.sent}`}>
                 {isEditing ? (
                   <>
-                    <input value={text} onChange={(e) => setText(e.target.value)} />
+                    <input
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                    />
                     <button onClick={handleEditConfirm}>Save</button>
                     <button onClick={() => setIsEditing(false)}>Cancel</button>
                   </>
+                ) : message.type === "file" ? (
+                  renderFilePreview(message.content)
                 ) : (
-                  <span>
-                    {message.type === "file" ? (
-                      <a
-                        href={message.content}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.fileLink}
-                      >
-                        📎 {message.content.split("/").pop()}
-                      </a>
-                    ) : (
-                      message.content
-                    )}
-                  </span>
+                  <span>{message.content}</span>
                 )}
               </div>
             </>

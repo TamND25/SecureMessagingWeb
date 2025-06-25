@@ -11,6 +11,13 @@ const userRoutes = require('./api/user');
 const friendshipRoutes = require('./api/friendship');
 const setupSocket = require("./socket");
 
+const fs = require("fs");
+const uploadDir = "uploads/";
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -26,6 +33,7 @@ app.use("/api/auth", registerRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/friendship", friendshipRoutes);
 app.use("/api/message", messageRoutes);
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Logs

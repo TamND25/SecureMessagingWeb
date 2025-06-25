@@ -42,12 +42,32 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     }
   };
 
+  const sendFile = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("receiverId", selectedUser.id);
+
+    try {
+      const uploadRes = await axios.post("/api/message/file", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const fileMsg = uploadRes.data.messageData;
+
+      socket.emit("send_message", fileMsg);
+      setMessages((prev) => [...prev, fileMsg]);
+    } catch (err) {
+      console.error("Failed to send file:", err);
+    }
+  };
+
   const receiveSocketMessage = useCallback((msg) => {
     const isRelevant =
-      (msg.senderId === selectedUser.id &&
-        msg.receiverId === loggedInUserId) ||
-      (msg.senderId === loggedInUserId &&
-        msg.receiverId === selectedUser.id);
+      (msg.senderId === selectedUser.id && msg.receiverId === loggedInUserId) ||
+      (msg.senderId === loggedInUserId && msg.receiverId === selectedUser.id);
     if (isRelevant) {
       setMessages((prev) => [...prev, msg]);
     }
@@ -87,47 +107,6 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     }
   };
 
-
-const sendFile = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const res = await fetch("/api/messages/file", {
-      method: "POST",
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-
-    const messageRes = await axios.post(
-      "/api/message/send",
-      {
-        receiverId: selectedUser.id,
-        content: data.fileUrl,
-        type: "file",
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const fileMsg = messageRes.data;
-
-    socket.emit("send_message", fileMsg);
-
-    setMessages((prev) => [...prev, fileMsg]);
-  } catch (err) {
-    console.error("Failed to send file:", err.message);
-  }
-};
-
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
@@ -140,9 +119,9 @@ const sendFile = async (file) => {
   return {
     messages,
     sendMessage,
+    sendFile,
     deleteMessage,
     editMessage,
-    sendFile,
   };
 };
 
