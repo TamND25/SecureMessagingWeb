@@ -5,8 +5,22 @@ module.exports = (sequelize) => {
     static associate(models) {
       User.hasMany(models.Friendship, { foreignKey: 'requesterId', as: 'requestedFriends' });
       User.hasMany(models.Friendship, { foreignKey: 'addresseeId', as: 'receivedFriends' });
+
       User.hasMany(models.message, { foreignKey: 'senderId', as: 'sentMessages' });
       User.hasMany(models.message, { foreignKey: 'receiverId', as: 'receivedMessages' });
+
+      User.belongsToMany(models.Group, {
+        through: models.GroupMember,
+        foreignKey: 'userId',
+        as: 'groups',
+      });
+
+      User.hasMany(models.Group, {
+        foreignKey: 'createdBy',
+        as: 'ownedGroups',
+      });
+
+      User.hasMany(models.Reaction, { foreignKey: 'userId', as: 'reactions' });
     }
   }
 
@@ -29,7 +43,7 @@ module.exports = (sequelize) => {
     },
     {
       sequelize,
-      modelName: "User",
+      modelName: "user",
       tableName: "users",
       timestamps: true,
     }

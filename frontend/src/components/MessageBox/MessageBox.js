@@ -1,41 +1,39 @@
 import React, { useState } from "react";
 import styles from "./MessageBox.module.scss";
+import useMessages from "../../hooks/useMessages";
+import MessageList from "./MessageList";
 
-const MessageBox = ({ user }) => {
-  const [messages, setMessages] = useState([]);
+const MessageBox = ({ user, socket, loggedInUserId }) => {
   const [newMessage, setNewMessage] = useState("");
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
+  const { messages, sendMessage, deleteMessage, editMessage } = useMessages({
+    selectedUser: user,
+    loggedInUserId,
+    socket,
+  });
 
   const handleSendMessage = () => {
-    if (newMessage.trim() === "") return;
-
-    const newMsg = {
-      text: newMessage,
-      sender: "me",
-      timestamp: new Date().toISOString(),
-    };
-    setMessages([...messages, newMsg]);
-    setNewMessage("");
-
+    if (newMessage.trim()) {
+      sendMessage(newMessage.trim());
+      setNewMessage("");
+    }
   };
 
   return (
     <div className={styles.chatWindow}>
       <div className={styles.header}>
-        Chatting with <strong>{user.name}</strong>
+        Chatting with <strong>{user.username}</strong>
       </div>
 
-      <div className={styles.messages}>
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`${styles.message} ${
-              msg.sender === "me" ? styles.sent : styles.received
-            }`}
-          >
-            {msg.text}
-          </div>
-        ))}
-      </div>
+      <MessageList
+        messages={messages}
+        loggedInUserId={loggedInUserId}
+        onDelete={deleteMessage}
+        onEdit={editMessage}
+        openDropdownId={openDropdownId}
+        setOpenDropdownId={setOpenDropdownId}
+      />
 
       <div className={styles.inputArea}>
         <input

@@ -1,5 +1,5 @@
-// src/pages/HomePage/HomePage.js
 import React, { useState } from 'react';
+import socket from '../../socket.js'; 
 import styles from './HomePage.module.scss';
 import Navbar from '../../components/NavBar/NavBar.js';
 import Sidebar from '../../components/Sidebar/Sidebar.js';
@@ -58,7 +58,7 @@ const HomePage = () => {
         />
         <div className={styles.chatArea}>
           {selectedUser ? (
-            <MessageBox user={selectedUser} />
+            <MessageBox user={selectedUser} socket={socket} loggedInUserId={loggedInUserId} />
           ) : (
             <div className={styles.placeholder}>Select a user to start chatting</div>
           )}

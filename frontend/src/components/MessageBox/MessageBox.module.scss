@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   border-left: 1px solid #ddd;
+  overflow: hidden;
 }
 
 .header {
@@ -10,6 +12,7 @@
   background-color: #fff;
   border-bottom: 1px solid #ddd;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .messages {
@@ -17,6 +20,7 @@
   padding: 15px;
   overflow-y: auto;
   background-color: #f9f9f9;
+  min-height: 0;
 }
 
 .message {
@@ -43,6 +47,7 @@
   padding: 10px;
   border-top: 1px solid #ddd;
   background-color: #fff;
+  flex-shrink: 0;
 
   input {
     flex: 1;

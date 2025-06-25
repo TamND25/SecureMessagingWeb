@@ -5,9 +5,12 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.user = require("./User.js")(sequelize);
+db.user = require("./User.js")(sequelize, DataTypes);
 db.Friendship = require("./friendship")(sequelize, DataTypes);
 db.message = require("./message")(sequelize, DataTypes);
+db.Reaction = require("./reaction")(sequelize, DataTypes);
+db.Group = require("./group")(sequelize, DataTypes);
+db.GroupMember = require("./groupMember")(sequelize, DataTypes);
 db.BlockedUser = require("./blockedUser")(sequelize, DataTypes);
 
 Object.values(db).forEach((model) => {

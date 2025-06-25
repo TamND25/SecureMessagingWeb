@@ -1,4 +1,5 @@
 import React, { useState} from 'react';
+import socket from "../../socket";
 import styles from './Login.module.scss';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -13,12 +14,15 @@ const Login = () => {
 
     const handleLogin = async () => {
         try     {
-            const res = await axios.post('http://localhost:5000/login', {
+            const res = await axios.post('http://localhost:5000/api/auth/login', {
                 username,
                 password,
             });
 
             localStorage.setItem('token', res.data.token);
+
+            socket.auth.token = res.data.token;
+            socket.connect();
 
             navigate('/home');
         }   catch   (err) {

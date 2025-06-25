@@ -1,37 +1,23 @@
-const { Model, DataTypes } = require('sequelize');
-
-module.exports = (sequelize) => {
-  class Message extends Model {
-    static associate(models) {
-      Message.belongsTo(models.user, { foreignKey: 'senderId', as: 'sender' });
-      Message.belongsTo(models.user, { foreignKey: 'receiverId', as: 'receiver' });
-    }
-  }
-
-  Message.init({
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    senderId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    receiverId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    content: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    }
-  }, {
-    sequelize,
-    modelName: 'Message',
-    tableName: 'messages',
-    timestamps: true,
+module.exports = (sequelize, DataTypes) => {
+  const Message = sequelize.define("Message", {
+    senderId: { type: DataTypes.INTEGER, allowNull: false },
+    receiverId: { type: DataTypes.INTEGER, allowNull: true },
+    groupId: { type: DataTypes.INTEGER, allowNull: true },
+    content: { type: DataTypes.TEXT, allowNull: false },
+    isEdited: { type: DataTypes.BOOLEAN, defaultValue: false },
+    timer: { type: DataTypes.INTEGER, allowNull: true },
+    deletedFor: { type: DataTypes.JSON, defaultValue: [] },
   });
+
+  Message.associate = models => {
+    Message.belongsTo(models.user, { foreignKey: 'senderId', as: 'Sender' });
+    Message.belongsTo(models.user, { foreignKey: 'receiverId', as: 'Receiver' });
+    Message.belongsTo(models.Group, { foreignKey: 'groupId', as: 'Group' });
+
+    if (models.Reaction) {
+      Message.hasMany(models.Reaction, { foreignKey: 'messageId', as: 'Reactions' });
+    }
+  };
 
   return Message;
 };
