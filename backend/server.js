@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const path = require("path");
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
@@ -25,6 +26,7 @@ app.use("/api/auth", registerRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/friendship", friendshipRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Logs
 app.use((req, res, next) => {

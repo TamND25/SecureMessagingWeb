@@ -50,56 +50,112 @@ const MessageItem = ({
         </div>
 
         <div className={styles.messageContentWrapper}>
-          <div className={`${styles.bubble} ${isSender ? styles.sent : styles.received}`}>
-            {isEditing ? (
-              <>
-                <input value={text} onChange={(e) => setText(e.target.value)} />
-                <button onClick={handleEditConfirm}>Save</button>
-                <button onClick={() => setIsEditing(false)}>Cancel</button>
-              </>
-            ) : (
-              <span>{text}</span>
-            )}
-          </div>
-
-          <button
-            className={`${styles.menuButton} ${isSender ? styles.leftMenu : styles.rightMenu}`}
-            onClick={() => {
-              setOpenDropdownId(isMenuOpen ? null : message.id);
-              setShowTimerInput(false);
-            }}
-          >
-            ⋮
-          </button>
-
-          {isMenuOpen && (
-            <div
-              className={`${styles.dropdown} ${isSender ? styles.dropdownLeft : styles.dropdownRight}`}
-            >
-              {isSender && (
-                <>
-                  <div onClick={() => setIsEditing(true)}>Edit</div>
-                  <div onClick={() => onDelete(message.id, true)}>Delete for Everyone</div>
-                  <div onClick={() => setShowTimerInput((prev) => !prev)}>
-                    Self-destruct...
+          {/* Left message: menu on right */}
+          {!isSender && (
+            <>
+              <div className={`${styles.bubble} ${styles.received}`}>
+                {isEditing ? (
+                  <>
+                    <input value={text} onChange={(e) => setText(e.target.value)} />
+                    <button onClick={handleEditConfirm}>Save</button>
+                    <button onClick={() => setIsEditing(false)}>Cancel</button>
+                  </>
+                ) : (
+                  <span>
+                    {message.type === "file" ? (
+                      <a
+                        href={message.content}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.fileLink}
+                      >
+                        📎 {message.content.split("/").pop()}
+                      </a>
+                    ) : (
+                      message.content
+                    )}
+                  </span>
+                )}
+              </div>
+              <div className={styles.menuWrapper}>
+                <button
+                  className={styles.menuButton}
+                  onClick={() => {
+                    setOpenDropdownId(isMenuOpen ? null : message.id);
+                    setShowTimerInput(false);
+                  }}
+                >
+                  ⋮
+                </button>
+                {isMenuOpen && (
+                  <div className={`${styles.dropdown} ${styles.dropdownRight}`}>
+                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
                   </div>
-                  {showTimerInput && (
-                    <div className={styles.timerInput}>
-                      <input
-                        type="number"
-                        min="0.1"
-                        step="0.1"
-                        value={minutes}
-                        onChange={(e) => setMinutes(e.target.value)}
-                        placeholder="Minutes"
-                      />
-                      <button onClick={handleSetTimer}>Start</button>
-                    </div>
-                  )}
-                </>
-              )}
-              <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
-            </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Right message: menu on left */}
+          {isSender && (
+            <>
+              <div className={styles.menuWrapper}>
+                <button
+                  className={styles.menuButton}
+                  onClick={() => {
+                    setOpenDropdownId(isMenuOpen ? null : message.id);
+                    setShowTimerInput(false);
+                  }}
+                >
+                  ⋮
+                </button>
+                {isMenuOpen && (
+                  <div className={`${styles.dropdown} ${styles.dropdownLeft}`}>
+                    <div onClick={() => setIsEditing(true)}>Edit</div>
+                    <div onClick={() => onDelete(message.id, true)}>Delete for Everyone</div>
+                    <div onClick={() => setShowTimerInput((prev) => !prev)}>Self-destruct...</div>
+                    {showTimerInput && (
+                      <div className={styles.timerInput}>
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="0.1"
+                          value={minutes}
+                          onChange={(e) => setMinutes(e.target.value)}
+                          placeholder="Minutes"
+                        />
+                        <button onClick={handleSetTimer}>Start</button>
+                      </div>
+                    )}
+                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
+                  </div>
+                )}
+              </div>
+              <div className={`${styles.bubble} ${styles.sent}`}>
+                {isEditing ? (
+                  <>
+                    <input value={text} onChange={(e) => setText(e.target.value)} />
+                    <button onClick={handleEditConfirm}>Save</button>
+                    <button onClick={() => setIsEditing(false)}>Cancel</button>
+                  </>
+                ) : (
+                  <span>
+                    {message.type === "file" ? (
+                      <a
+                        href={message.content}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.fileLink}
+                      >
+                        📎 {message.content.split("/").pop()}
+                      </a>
+                    ) : (
+                      message.content
+                    )}
+                  </span>
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>

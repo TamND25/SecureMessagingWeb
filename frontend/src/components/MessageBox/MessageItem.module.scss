@@ -12,10 +12,10 @@
 }
 
 .messageContainer {
+  max-width: 70%;
   display: flex;
   flex-direction: column;
   position: relative;
-  max-width: 60%;
 }
 
 .senderName {
@@ -27,26 +27,33 @@
 .messageContentWrapper {
   display: flex;
   align-items: center;
+  gap: 6px;
   position: relative;
 }
 
 .bubble {
   padding: 10px 15px;
   border-radius: 20px;
-  word-wrap: break-word;
-  position: relative;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  max-width: 100%;
   z-index: 1;
 }
 
 .sent {
   background-color: #dcf8c6;
-  align-self: flex-end;
 }
 
 .received {
   background-color: #fff;
   border: 1px solid #ddd;
-  align-self: flex-start;
+}
+
+.menuWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .menuButton {
@@ -54,20 +61,6 @@
   border: none;
   font-size: 1.2em;
   cursor: pointer;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-}
-
-.leftMenu {
-  right: 100%;
-  margin-right: 8px;
-}
-
-.rightMenu {
-  left: 100%;
-  margin-left: 8px;
 }
 
 .dropdown {
@@ -78,33 +71,32 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  z-index: 3;
+  z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 6px;
   white-space: nowrap;
-
-  div {
-    cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 4px;
-    transition: background 0.2s;
-  }
-
-  div:hover {
-    background: #f0f0f0;
-  }
+  min-width: 150px;
 }
 
 .dropdownLeft {
-  right: 100%;
-  margin-right: 8px;
+  right: calc(100% + 6px);
 }
 
 .dropdownRight {
-  left: 100%;
-  margin-left: 8px;
+  left: calc(100% + 6px);
+}
+
+.dropdown div {
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.dropdown div:hover {
+  background: #f0f0f0;
 }
 
 .timerInput {
@@ -125,4 +117,10 @@
     border-radius: 4px;
     cursor: pointer;
   }
+}
+
+.fileLink {
+  color: #0645ad;
+  text-decoration: underline;
+  font-weight: 500;
 }

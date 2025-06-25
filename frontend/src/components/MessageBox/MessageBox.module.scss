@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
   border-left: 1px solid #ddd;
   overflow: hidden;
 }
@@ -23,39 +22,34 @@
   min-height: 0;
 }
 
-.message {
-  padding: 10px 15px;
-  margin-bottom: 10px;
-  border-radius: 20px;
-  max-width: 60%;
-  word-wrap: break-word;
-}
-
-.sent {
-  align-self: flex-end;
-  background-color: #dcf8c6;
-}
-
-.received {
-  align-self: flex-start;
-  background-color: #fff;
-  border: 1px solid #ddd;
-}
-
 .inputArea {
   display: flex;
+  align-items: center;
   padding: 10px;
   border-top: 1px solid #ddd;
   background-color: #fff;
   flex-shrink: 0;
 
-  input {
+  input[type="text"] {
     flex: 1;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 20px;
     outline: none;
     margin-right: 10px;
+  }
+
+  .fileButton {
+    background: none;
+    border: none;
+    margin-right: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #555;
+
+    &:hover {
+      color: #3f51b5;
+    }
   }
 
   button {

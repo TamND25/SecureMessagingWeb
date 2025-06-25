@@ -56,11 +56,21 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
   const deleteMessage = async (id, hard = false) => {
     try {
       if (hard) {
-        await hardDeleteMessage(id);
+        await hardDeleteMessage(id, token);
+        setMessages((prev) => prev.filter((m) => m.id !== id));
       } else {
-        await softDeleteMessage(id);
+        await softDeleteMessage(id, token);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === id
+              ? {
+                  ...m,
+                  deletedFor: [...(m.deletedFor || []), loggedInUserId],
+                }
+              : m
+          )
+        );
       }
-      setMessages((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -68,14 +78,55 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
 
   const editMessage = async (id, newText) => {
     try {
-      await editMessageApi(id, newText);
+      const res = await editMessageApi(id, newText, token);
       setMessages((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, content: newText, isEdited: true } : m))
+        prev.map((m) => (m.id === id ? { ...m, ...res.data } : m))
       );
     } catch (err) {
       console.error("Edit failed:", err);
     }
   };
+
+
+const sendFile = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await fetch("/api/messages/file", {
+      method: "POST",
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    const messageRes = await axios.post(
+      "/api/message/send",
+      {
+        receiverId: selectedUser.id,
+        content: data.fileUrl,
+        type: "file",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const fileMsg = messageRes.data;
+
+    socket.emit("send_message", fileMsg);
+
+    setMessages((prev) => [...prev, fileMsg]);
+  } catch (err) {
+    console.error("Failed to send file:", err.message);
+  }
+};
 
   useEffect(() => {
     fetchMessages();
@@ -91,6 +142,7 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     sendMessage,
     deleteMessage,
     editMessage,
+    sendFile,
   };
 };
 

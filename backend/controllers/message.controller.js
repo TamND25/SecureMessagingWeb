@@ -19,6 +19,7 @@ exports.sendMessage = async (req, res) => {
       groupId,
       content,
       timer,
+      type: type || "text",
       deletedFor: [],
     });
 
@@ -176,4 +177,17 @@ exports.reactToMessage = async (req, res) => {
     console.error("Error reacting to message:", err);
     res.status(500).json({ error: "Failed to react" });
   }
+};
+
+exports.uploadFile = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const fileUrl = `/uploads/${req.file.filename}`;
+  res.status(200).json({
+    message: "File uploaded successfully",
+    fileUrl,
+    fileName: req.file.originalname,
+  });
 };
