@@ -106,7 +106,6 @@ export async function decryptAESKeyWithPrivateKey(encryptedKeyB64, privateKey) {
             privateKey,
             base64ToArrayBuffer(encryptedKeyB64)
         );
-        console.log("Decrypted AES raw key:", new Uint8Array(rawKey));
         return await subtle.importKey("raw", rawKey, "AES-GCM", true, [
             "encrypt",
             "decrypt",  

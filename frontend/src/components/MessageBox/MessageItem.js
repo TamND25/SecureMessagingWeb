@@ -54,20 +54,27 @@ const MessageItem = ({
 
       const privateKeyPEM = localStorage.getItem("privateKeyPEM");
 
-      if (isSender || !privateKeyPEM) {
-        setText(message.content);
+      if (!privateKeyPEM) {
+        setText("[Private key not found]");   
         return;
       }
 
       try {
-        if (message.encryptedKey && message.iv) {
-          const privateKey = await importPrivateKey(privateKeyPEM);
-          const aesKey = await decryptAESKeyWithPrivateKey(message.encryptedKey, privateKey);
-          const decryptedText = await decryptMessage(aesKey, message.content, message.iv);
-          setText(decryptedText);
-        } else {
-          setText(message.content);
-        }
+      
+        const privateKey = await importPrivateKey(privateKeyPEM);
+
+        const encryptedKey = isSender
+          ? message.encryptedKeyForSender
+          : message.encryptedKeyForReceiver;
+
+        if (!encryptedKey || !message.iv || !message.content ) {
+          throw new Error("Missing encrypted key, IV, or content");
+        }          
+
+        const aesKey = await decryptAESKeyWithPrivateKey(encryptedKey, privateKey);
+        const decryptedText = await decryptMessage(aesKey, message.content, message.iv);
+        setText(decryptedText);
+        
       } catch (err) {
         console.error("Decryption failed:", err);
         setText("[Unable to decrypt]");

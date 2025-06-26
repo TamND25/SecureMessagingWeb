@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     isEdited: { type: DataTypes.BOOLEAN, defaultValue: false },
     timer: { type: DataTypes.INTEGER, allowNull: true },
     deletedFor: { type: DataTypes.JSON, defaultValue: [] },
-    encryptedKey: { type: DataTypes.TEXT, allowNull: true },
+    encryptedKeyForSender: { type: DataTypes.TEXT, allowNull: true },
+    encryptedKeyForReceiver: { type: DataTypes.TEXT, allowNull: true },
     iv: { type: DataTypes.STRING, allowNull: true },
   });
 

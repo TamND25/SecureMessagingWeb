@@ -23,6 +23,17 @@ export const useLogin = () => {
 
     const privateKey = await importPrivateKey(decryptedPEM);
 
+    const publicKeyRes = await axios.get(`http://localhost:5000/api/secure/getUserKey/${user.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const publicKeyPEM = publicKeyRes.data?.publicKey;
+    if (publicKeyPEM) {
+      localStorage.setItem('publicKey', publicKeyPEM);
+    } else {
+      console.warn("Public key not found for sender.");
+    }
+
     localStorage.setItem('token', token);
     localStorage.setItem('privateKeyPEM', decryptedPEM);
 

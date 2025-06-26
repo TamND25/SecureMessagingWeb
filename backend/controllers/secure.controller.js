@@ -45,7 +45,7 @@ exports.getUserKey = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
   const senderId = req.user.id;
-  const { receiverId, groupId, content, type, timer, encryptedKey, iv } = req.body;
+  const { receiverId, groupId, content, type, timer, encryptedKeyForSender, encryptedKeyForReceiver, iv } = req.body;
 
   if (!content || (!receiverId && !groupId)) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -59,7 +59,8 @@ exports.sendMessage = async (req, res) => {
       content,
       type: type || "text",
       timer,
-      encryptedKey,
+      encryptedKeyForSender,
+      encryptedKeyForReceiver,
       iv,
       isEdited: false,
       deletedFor: [],

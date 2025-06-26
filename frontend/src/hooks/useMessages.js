@@ -36,6 +36,7 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     try {
       const token = localStorage.getItem("token");
       const privateKeyPEM = localStorage.getItem("privateKeyPEM");
+      
 
       if (!token || !privateKeyPEM) {
         console.error("Missing auth token or private key.");
@@ -53,6 +54,13 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
 
       const recipientPublicKey = await importPublicKey(recipientPublicKeyB64);
 
+      const senderPublicKeyB64 = localStorage.getItem("publicKey");
+      if (!senderPublicKeyB64) {
+        throw new Error("Sender public key not found");
+      }
+
+      const senderPublicKey = await importPublicKey(senderPublicKeyB64);
+
       const aesKey = await generateAESKey();
       const { ciphertext, iv } = await encryptMessage(aesKey, text);
 
@@ -60,37 +68,25 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
         throw new Error("Encryption failed — missing ciphertext or IV");
       }
 
-      const encryptedKey = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
-
-      if (!encryptedKey) {
-        throw new Error("AES key encryption failed");
-      }
+      const encryptedKeyForSender = await encryptAESKeyWithPublicKey(aesKey, senderPublicKey);
+      const encryptedKeyForReceiver = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
 
       const payload = {
         receiverId: selectedUser.id,
         content: ciphertext,
         iv,
-        encryptedKey,
+        encryptedKeyForSender,
+        encryptedKeyForReceiver,
         type: "text",
       };
-
-      console.log("Sending secure message payload:", payload);
 
       const res = await axios.post("/api/secure/sendMessage", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Recipient's public key (Base64):", recipientPublicKeyB64);
-
       const newMsg = res.data;
-      const localCopy = {
-        ...newMsg,
-        content: text,  
-        iv, 
-        encryptedKey, 
-      };
       socket.emit("send_message", newMsg);
-      setMessages((prev) => [...prev, localCopy]);
+      setMessages((prev) => [...prev, newMsg]);
     } catch (err) {
       console.error("Secure send failed:", err);
     }
