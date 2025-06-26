@@ -12,6 +12,7 @@ db.Reaction = require("./reaction")(sequelize, DataTypes);
 db.Group = require("./group")(sequelize, DataTypes);
 db.GroupMember = require("./groupMember")(sequelize, DataTypes);
 db.BlockedUser = require("./blockedUser")(sequelize, DataTypes);
+db.GroupKey = require("./groupKey")(sequelize, DataTypes);
 
 Object.values(db).forEach((model) => {
   if (model.associate) {

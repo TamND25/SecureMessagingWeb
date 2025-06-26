@@ -7,6 +7,13 @@ import {
   editMessage as editMessageApi,
 } from "../services/messageApi";
 
+import {
+  generateAESKey,
+  encryptMessage,
+  importPublicKey,
+  encryptAESKeyWithPublicKey,
+} from "../utils/secureClient";
+
 const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
   const [messages, setMessages] = useState([]);
   const token = localStorage.getItem("token");
@@ -25,20 +32,67 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
 
   const sendMessage = async (text) => {
     if (!text.trim()) return;
+
     try {
-      const res = await axios.post(
-        "/api/message/send",
-        {
-          receiverId: selectedUser.id,
-          content: text,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const token = localStorage.getItem("token");
+      const privateKeyPEM = localStorage.getItem("privateKeyPEM");
+
+      if (!token || !privateKeyPEM) {
+        console.error("Missing auth token or private key.");
+        return;
+      }
+
+      const keyRes = await axios.get(`/api/secure/getUserKey/${selectedUser.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const recipientPublicKeyB64 = keyRes.data?.publicKey;
+      if (!recipientPublicKeyB64) {
+        throw new Error("Recipient public key not found");
+      }
+
+      const recipientPublicKey = await importPublicKey(recipientPublicKeyB64);
+
+      const aesKey = await generateAESKey();
+      const { ciphertext, iv } = await encryptMessage(aesKey, text);
+
+      if (!ciphertext || !iv) {
+        throw new Error("Encryption failed — missing ciphertext or IV");
+      }
+
+      const encryptedKey = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
+
+      if (!encryptedKey) {
+        throw new Error("AES key encryption failed");
+      }
+
+      const payload = {
+        receiverId: selectedUser.id,
+        content: ciphertext,
+        iv,
+        encryptedKey,
+        type: "text",
+      };
+
+      console.log("Sending secure message payload:", payload);
+
+      const res = await axios.post("/api/secure/sendMessage", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("Recipient's public key (Base64):", recipientPublicKeyB64);
+
       const newMsg = res.data;
+      const localCopy = {
+        ...newMsg,
+        content: text,  
+        iv, 
+        encryptedKey, 
+      };
       socket.emit("send_message", newMsg);
-      setMessages((prev) => [...prev, newMsg]);
+      setMessages((prev) => [...prev, localCopy]);
     } catch (err) {
-      console.error("Sending message failed:", err);
+      console.error("Secure send failed:", err);
     }
   };
 
@@ -56,7 +110,6 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
       });
 
       const fileMsg = uploadRes.data.messageData;
-
       socket.emit("send_message", fileMsg);
       setMessages((prev) => [...prev, fileMsg]);
     } catch (err) {

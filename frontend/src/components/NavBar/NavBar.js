@@ -63,6 +63,9 @@ const NavBar = () => {
     const handleLogout = () => {
         console.log("Logging out...");
         localStorage.removeItem('token');
+        localStorage.removeItem("privateKey");
+        localStorage.removeItem("privateKeyPEM");   
+        localStorage.removeItem("publicKey");
         window.location.href = '/login';
     };
 

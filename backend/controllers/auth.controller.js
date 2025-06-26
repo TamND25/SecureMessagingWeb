@@ -4,31 +4,32 @@ const db = require("../models");
 const User = db.user;
 
 exports.register = async (req, res) => {
-  const { email, username, password } = req.body;
+  const { username, email, password, publicKey, encryptedPrivateKey, salt, iv } = req.body;
 
   try {
-    // Check for existing email
-    const existingEmail = await User.findOne({ where: { email } });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email is already registered" });
-    }
-
-    // Check for existing username
-    const existingUsername = await User.findOne({ where: { username } });
-    if (existingUsername) {
-      return res.status(400).json({ message: "Username is already taken" });
-    }
-
-    // Hash and create new user
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({ email, username, password: hashedPassword });
 
-    res.status(200).json({ message: "User registered successfully!" });
+    const newUser = await db.user.create({
+      username,
+      email,
+      password: hashedPassword,
+      publicKey,
+      encryptedPrivateKey,
+      salt,
+      iv,
+    });
+
+    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    res.status(201).json({ token, user: { id: newUser.id, username, email } });
   } catch (err) {
-    console.error("Registration error:", err);
-    res.status(500).json({ message: "Server error during registration" });
+    console.error('Registration failed:', err);
+    res.status(500).json({ error: 'Registration error' });
   }
 };
+
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
@@ -42,7 +43,17 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
     console.log("Generated token:", token);
-    res.status(200).json({ token });
+    res.status(200).json({ 
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        publicKey: user.publicKey,
+        encryptedPrivateKey: user.encryptedPrivateKey,
+        salt: user.salt,
+        iv: user.iv,
+      }
+     });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });

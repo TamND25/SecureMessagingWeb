@@ -26,20 +26,13 @@ module.exports = (sequelize) => {
 
   User.init(
     {
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
+      username: { type: DataTypes.STRING, allowNull: false, unique: true },
+      email: { type: DataTypes.STRING, allowNull: false, unique: true },
+      password: { type: DataTypes.STRING, allowNull: false },
+      publicKey: { type: DataTypes.TEXT, allowNull: true },
+      encryptedPrivateKey: { type: DataTypes.TEXT, allowNull: true },
+      salt: { type: DataTypes.STRING, allowNull: true },
+      iv: { type: DataTypes.STRING, allowNull: true },
     },
     {
       sequelize,

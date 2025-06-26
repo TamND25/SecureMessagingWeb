@@ -5,8 +5,11 @@ import Login from './pages/Login/Login.js'
 import Register from './pages/Register/Register.js';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute.js';
 import PublicRoute from './components/PrivateRoute/PublicRoute.js';
+import { useInitCryptoKeys } from './hooks/useInitCryptoKeys.js';
 
 function App() {
+
+  useInitCryptoKeys(); 
 
   return (
     <Router>

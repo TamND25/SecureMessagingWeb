@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./MessageItem.module.scss";
 
+import {
+  importPrivateKey,
+  decryptAESKeyWithPrivateKey,
+  decryptMessage,
+} from "../../utils/secureClient";
+
 const MessageItem = ({
   message,
   isSender,
@@ -10,7 +16,7 @@ const MessageItem = ({
   setOpenDropdownId,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [text, setText] = useState(message.content);
+  const [text, setText] = useState("");
   const [showTimerInput, setShowTimerInput] = useState(false);
   const [minutes, setMinutes] = useState("");
   const timerRef = useRef(null);
@@ -42,11 +48,41 @@ const MessageItem = ({
     };
   }, []);
 
+  useEffect(() => {
+    const decryptSecureMessage = async () => {
+      if (message.type !== "text") return;
+
+      const privateKeyPEM = localStorage.getItem("privateKeyPEM");
+
+      if (isSender || !privateKeyPEM) {
+        setText(message.content);
+        return;
+      }
+
+      try {
+        if (message.encryptedKey && message.iv) {
+          const privateKey = await importPrivateKey(privateKeyPEM);
+          const aesKey = await decryptAESKeyWithPrivateKey(message.encryptedKey, privateKey);
+          const decryptedText = await decryptMessage(aesKey, message.content, message.iv);
+          setText(decryptedText);
+        } else {
+          setText(message.content);
+        }
+      } catch (err) {
+        console.error("Decryption failed:", err);
+        setText("[Unable to decrypt]");
+      }
+    };
+
+    decryptSecureMessage();
+  }, [message, isSender]);
+
   const renderFilePreview = (url) => {
     const ext = url.split(".").pop().toLowerCase();
     const fullUrl = url.startsWith("http")
       ? url
       : `http://localhost:5000${url}`;
+
     if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
       return <img src={fullUrl} alt="shared" className={styles.previewImage} />;
     }
@@ -64,20 +100,31 @@ const MessageItem = ({
         rel="noopener noreferrer"
         className={styles.fileLink}
       >
-        📎 {url.split("/").pop()}
+        {url.split("/").pop()}
       </a>
     );
   };
 
-  console.log("🔍 Message received in MessageItem:", message);
-  console.log("📎 Is this a file message?", message.type === "file", "Type:", message.type);
+  const renderBubble = () => {
+    if (isEditing) {
+      return (
+        <>
+          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <button onClick={handleEditConfirm}>Save</button>
+          <button onClick={() => setIsEditing(false)}>Cancel</button>
+        </>
+      );
+    }
+
+    if (message.type === "file") {
+      return renderFilePreview(message.content);
+    }
+
+    return <span>{text}</span>;
+  };
 
   return (
-    <div
-      className={`${styles.messageRow} ${
-        isSender ? styles.sentRow : styles.receivedRow
-      }`}
-    >
+    <div className={`${styles.messageRow} ${isSender ? styles.sentRow : styles.receivedRow}`}>
       <div className={styles.messageContainer}>
         <div className={styles.senderName}>
           {isSender ? "You" : message.senderName || "Friend"}
@@ -86,22 +133,7 @@ const MessageItem = ({
         <div className={styles.messageContentWrapper}>
           {!isSender && (
             <>
-              <div className={`${styles.bubble} ${styles.received}`}>
-                {isEditing ? (
-                  <>
-                    <input
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                    />
-                    <button onClick={handleEditConfirm}>Save</button>
-                    <button onClick={() => setIsEditing(false)}>Cancel</button>
-                  </>
-                ) : message.type === "file" ? (
-                  renderFilePreview(message.content)
-                ) : (
-                  <span>{message.content}</span>
-                )}
-              </div>
+              <div className={`${styles.bubble} ${styles.received}`}>{renderBubble()}</div>
               <div className={styles.menuWrapper}>
                 <button
                   className={styles.menuButton}
@@ -114,9 +146,7 @@ const MessageItem = ({
                 </button>
                 {isMenuOpen && (
                   <div className={`${styles.dropdown} ${styles.dropdownRight}`}>
-                    <div onClick={() => onDelete(message.id, false)}>
-                      Hide for Me
-                    </div>
+                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
                   </div>
                 )}
               </div>
@@ -138,12 +168,8 @@ const MessageItem = ({
                 {isMenuOpen && (
                   <div className={`${styles.dropdown} ${styles.dropdownLeft}`}>
                     <div onClick={() => setIsEditing(true)}>Edit</div>
-                    <div onClick={() => onDelete(message.id, true)}>
-                      Delete for Everyone
-                    </div>
-                    <div onClick={() => setShowTimerInput((prev) => !prev)}>
-                      Self-destruct...
-                    </div>
+                    <div onClick={() => onDelete(message.id, true)}>Delete for Everyone</div>
+                    <div onClick={() => setShowTimerInput((prev) => !prev)}>Self-destruct...</div>
                     {showTimerInput && (
                       <div className={styles.timerInput}>
                         <input
@@ -157,28 +183,11 @@ const MessageItem = ({
                         <button onClick={handleSetTimer}>Start</button>
                       </div>
                     )}
-                    <div onClick={() => onDelete(message.id, false)}>
-                      Hide for Me
-                    </div>
+                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
                   </div>
                 )}
               </div>
-              <div className={`${styles.bubble} ${styles.sent}`}>
-                {isEditing ? (
-                  <>
-                    <input
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                    />
-                    <button onClick={handleEditConfirm}>Save</button>
-                    <button onClick={() => setIsEditing(false)}>Cancel</button>
-                  </>
-                ) : message.type === "file" ? (
-                  renderFilePreview(message.content)
-                ) : (
-                  <span>{message.content}</span>
-                )}
-              </div>
+              <div className={`${styles.bubble} ${styles.sent}`}>{renderBubble()}</div>
             </>
           )}
         </div>

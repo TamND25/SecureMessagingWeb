@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './Register.module.scss';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useRegister } from '../../hooks/useRegister';
 
 import loginImage from '../../assets/login_image.png';
 
@@ -10,26 +10,22 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
+  const { registerUser } = useRegister();
   const navigate = useNavigate();
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      alert('Passwords do not match!');
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/register", {
-        email,
-        username,
-        password,
-      });
-
-      console.log("Registered:", response.data);
+      const res = await registerUser({ username, email, password });
+      console.log('Registered:', res);
       navigate('/login');
     } catch (err) {
-      console.error("Registration error:", err.response?.data || err.message);
+      console.error('Registration error:', err.response?.data || err.message);
+      alert(err.response?.data?.error || 'Registration failed');
     }
   };
 
