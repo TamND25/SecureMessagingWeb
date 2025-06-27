@@ -41,7 +41,7 @@ const useGroupMembers = (groupId) => {
   const kickMember = async (userId) => {
     await axios.post(
       `/api/group/kick`,
-      { groupId, userId },
+      { groupId, targetUserId: userId },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     await fetchMembers();
@@ -54,6 +54,7 @@ const useGroupMembers = (groupId) => {
   return {
     members,
     loading,
+    fetchMembers,
     promoteOwner,
     demoteOwner,
     kickMember,

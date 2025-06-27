@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./GroupMessageBox.module.scss";
+import useFriendData from "../../hooks/useFriendData";
 import useGroupMessages from "../../hooks/useGroupMessages";
 import MessageList from "../MessageBox/MessageList";
 import SendBar from "../MessageBox/SendBar";
@@ -8,6 +9,7 @@ import GroupControlPanel from "./GroupControlPanel/GroupControlPanel";
 const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showControlPanel, setShowControlPanel] = useState(true);
+  const { users: friends } = useFriendData();
   const { messages, sendMessage, sendFile, loadMessages, deleteMessage, editMessage } =
     useGroupMessages(group.id, socket);
 
@@ -47,7 +49,7 @@ const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
       </div>
 
       {showControlPanel && (
-        <GroupControlPanel group={group} loggedInUserId={loggedInUserId} />
+        <GroupControlPanel group={group} loggedInUserId={loggedInUserId} friends={friends}/>
       )}
     </div>
   );

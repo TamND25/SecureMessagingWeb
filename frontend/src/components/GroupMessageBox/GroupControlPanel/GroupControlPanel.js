@@ -5,7 +5,7 @@ import GroupMemberList from "./GroupMemberList";
 import GroupAddUserModal from "./GroupAddUserModal";
 import axios from "axios";
 
-const GroupControlPanel = ({ group, loggedInUserId, friends }) => {
+const GroupControlPanel = ({ group, loggedInUserId, friends = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const {
     members,
@@ -13,10 +13,13 @@ const GroupControlPanel = ({ group, loggedInUserId, friends }) => {
     promoteOwner,
     demoteOwner,
     kickMember,
-    fetchMembers
+    fetchMembers,
   } = useGroupMembers(group?.id);
 
-  const currentUser = members.find((m) => m.id === loggedInUserId);
+  const currentUser = Array.isArray(members)
+    ? members.find((m) => m.id === loggedInUserId)
+    : null;
+
   const isOwner = currentUser?.isOwner;
 
   const handleAddMembers = async (userIds) => {
@@ -24,7 +27,11 @@ const GroupControlPanel = ({ group, loggedInUserId, friends }) => {
       await axios.post(
         "/api/group/add-members",
         { groupId: group.id, userIds },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       await fetchMembers();
     } catch (err) {
@@ -33,17 +40,27 @@ const GroupControlPanel = ({ group, loggedInUserId, friends }) => {
   };
 
   const handleDeleteGroup = async () => {
-    if (!window.confirm("Are you sure you want to delete this group? This cannot be undone.")) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this group? This cannot be undone."
+    );
+    if (!confirmed) return;
 
     try {
       await axios.delete(`/api/group/delete/${group.id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
       window.location.reload();
     } catch (err) {
       console.error("Failed to delete group:", err);
     }
   };
+
+  const availableFriends =
+    Array.isArray(friends) && Array.isArray(members)
+      ? friends.filter((f) => !members.some((m) => m.id === f.id))
+      : [];
 
   return (
     <div className={styles.panel}>
@@ -63,7 +80,10 @@ const GroupControlPanel = ({ group, loggedInUserId, friends }) => {
 
       {isOwner && (
         <>
-          <button onClick={() => setShowModal(true)} className={styles.actionBtn}>
+          <button
+            onClick={() => setShowModal(true)}
+            className={styles.actionBtn}
+          >
             Add Members
           </button>
           <button onClick={handleDeleteGroup} className={styles.deleteBtn}>
@@ -74,7 +94,7 @@ const GroupControlPanel = ({ group, loggedInUserId, friends }) => {
 
       {showModal && (
         <GroupAddUserModal
-          friends={friends.filter((f) => !members.some((m) => m.id === f.id))}
+          friends={availableFriends}
           onAddUsers={handleAddMembers}
           onClose={() => setShowModal(false)}
         />
