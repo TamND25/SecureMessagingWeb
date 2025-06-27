@@ -2,16 +2,20 @@ import React, { useState } from "react";
 import styles from "./Sidebar.module.scss";
 import SidebarTabs from "./Sections/SidebarTabs";
 import SearchBarWithActions from "./Sections/SearchBarWithActions";
-import FriendRequestsSection from "./Sections/FriendRequestsSection";
-import CurrentFriendsSection from "./Sections/CurrentFriendsSection";
-import BlockedUsersSection from "./Sections/BlockedUsersSection";
+import FriendRequestsSection from "./Sections/Friend/FriendRequestsSection";
+import CurrentFriendsSection from "./Sections/Friend/CurrentFriendsSection";
+import BlockedUsersSection from "./Sections/Friend/BlockedUsersSection";
+import CreateGroupModal from "./Sections/Group/CreateGroupModal";
+import CurrentGroupsSection from "./Sections/Group/CurrentGroupSection";
+import useGroupChat from "../../hooks/useGroupChat";
 
 const Sidebar = ({
   friends = [],
   blockedUsers = [],
   loggedInUserId,
-  onCreateGroup,
   onSelectUser,
+  setSelectedGroup,
+  selectedGroup,
   requests = [],
   handleAccept,
   handleDecline,
@@ -28,6 +32,18 @@ const Sidebar = ({
   getLatestMessageTime = () => new Date(),
 }) => {
   const [activeTab, setActiveTab] = useState("messages");
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+
+  const { createGroup } = useGroupChat();
+
+  const handleCreateGroup = async ({ name, memberIds }) => {
+    try {
+      await createGroup(name, memberIds, loggedInUserId);
+      setIsGroupModalOpen(false);
+    } catch (err) {
+      console.error("Failed to create group:", err);
+    }
+  };
 
   const filteredFriends = friends.filter((user) =>
     user.username.toLowerCase().includes(inputValue.toLowerCase())
@@ -47,6 +63,11 @@ const Sidebar = ({
     );
   });
 
+  const handleSelectGroup = (group) => {
+    setSelectedGroup(group);
+    onSelectUser(null);
+  };
+
   return (
     <div className={styles.sidebar}>
       <SidebarTabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -56,7 +77,7 @@ const Sidebar = ({
         inputValue={inputValue}
         setInputValue={setInputValue}
         handleAddFriend={handleAddFriend}
-        onCreateGroup={onCreateGroup}
+        handleCreateGroup={() => setIsGroupModalOpen(true)}
       />
 
       {message && (
@@ -65,18 +86,28 @@ const Sidebar = ({
             message ? styles[messageType] : styles.hidden
           }`}
         >
-          {message || ''}
+          {message || ""}
         </div>
       )}
 
       <div className={styles.userList}>
         {activeTab === "messages" && (
-          <CurrentFriendsSection
-            friends={sortedFriends}
-            onSelectUser={onSelectUser}
-            onUnfriend={handleUnfriend}
-            onBlock={handleBlock}
-          />
+          <>
+            <CurrentFriendsSection
+              friends={sortedFriends}
+              onSelectUser={(user) => {
+                onSelectUser(user);
+                setSelectedGroup(null);
+              }}
+              onUnfriend={handleUnfriend}
+              onBlock={handleBlock}
+            />
+
+            <CurrentGroupsSection
+              selectedGroupId={selectedGroup?.id}
+              onSelectGroup={handleSelectGroup}
+            />
+          </>
         )}
 
         {activeTab === "contacts" && (
@@ -98,7 +129,6 @@ const Sidebar = ({
               onBlock={handleBlock}
             />
 
-
             <BlockedUsersSection
               blockedUsers={filteredBlocked}
               onSelectUser={onSelectUser}
@@ -109,6 +139,15 @@ const Sidebar = ({
           </>
         )}
       </div>
+
+      {isGroupModalOpen && (
+        <CreateGroupModal
+          friends={filteredFriends || []}
+          onClose={() => setIsGroupModalOpen(false)}
+          onCreate={handleCreateGroup}
+          loggedInUserId={loggedInUserId}
+        />
+      )}
     </div>
   );
 };

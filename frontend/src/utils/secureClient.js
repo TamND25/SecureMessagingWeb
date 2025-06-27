@@ -37,6 +37,9 @@ export async function generateRSAKeyPair() {
 }
 
 export async function importPrivateKey(pem) {
+  if (!pem) {
+    throw new Error("PEM is null or undefined during importPrivateKey()");
+  }
   const base64 = pemToBase64(pem);
   return await subtle.importKey(
     "pkcs8",
@@ -120,7 +123,7 @@ export async function decryptAESKeyWithPrivateKey(encryptedKeyB64, privateKey) {
 export async function encryptFile(file) {
   const aesKey = await generateAESKey();
 
-  // Read file as ArrayBuffer
+
   const fileBuffer = await file.arrayBuffer();
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
 
@@ -137,4 +140,27 @@ export async function encryptFile(file) {
     originalName: file.name,
     mimeType: file.type,
   };
+}
+
+export async function encryptAESGCM(key, plaintext) {
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(plaintext);
+
+  const ciphertext = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encoded
+  );
+
+  return {
+    ciphertext: arrayBufferToBase64(ciphertext),
+    iv: arrayBufferToBase64(iv),
+  };
+}
+
+export async function decryptAESGCM(key, ciphertextBase64, ivBase64) {
+  const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0));
+  const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  return new TextDecoder().decode(decrypted);
 }

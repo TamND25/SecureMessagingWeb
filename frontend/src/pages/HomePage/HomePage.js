@@ -4,11 +4,13 @@ import styles from './HomePage.module.scss';
 import Navbar from '../../components/NavBar/NavBar.js';
 import Sidebar from '../../components/Sidebar/Sidebar.js';
 import MessageBox from '../../components/MessageBox/MessageBox.js';
+import GroupMessageBox from '../../components/GroupMessageBox/GroupMessageBox.js';
 import useAuthCheck from '../../hooks/useAuthCheck.js';
 import useFriendData from '../../hooks/useFriendData.js';
 
 const HomePage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   useAuthCheck();
 
   const {
@@ -42,6 +44,8 @@ const HomePage = () => {
           loggedInUserId={loggedInUserId}
           onCreateGroup={() => {}}
           onSelectUser={setSelectedUser}
+          setSelectedGroup={setSelectedGroup}
+          selectedGroup={selectedGroup}
           handleAccept={handleAccept}
           handleDecline={handleDecline}
           handleAddFriend={handleAddFriend}
@@ -57,10 +61,13 @@ const HomePage = () => {
           getLatestMessageTime={getLatestMessageTime}
         />
         <div className={styles.chatArea}>
-          {selectedUser ? (
+          {selectedGroup ? (
+            <GroupMessageBox group={selectedGroup} socket={socket} loggedInUserId={loggedInUserId} />
+            
+          ) : selectedUser ? (
             <MessageBox user={selectedUser} socket={socket} loggedInUserId={loggedInUserId} />
           ) : (
-            <div className={styles.placeholder}>Select a user to start chatting</div>
+            <div className={styles.placeholder}>Select a user or group to start chatting</div>
           )}
         </div>
       </div>

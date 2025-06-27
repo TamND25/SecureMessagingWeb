@@ -1,6 +1,10 @@
-import CryptoJS from 'crypto-js';
 import axios from 'axios';
-import { importPrivateKey } from '../utils/secureClient';
+import {
+  decryptAESGCM,
+  decryptAESKeyWithPrivateKey,
+  importPrivateKey,
+  base64ToArrayBuffer
+} from '../utils/secureClient';
 
 export const useLogin = () => {
   const loginUser = async ({ username, password }) => {
@@ -10,33 +14,40 @@ export const useLogin = () => {
     });
 
     const { token, user } = res.data;
-    const { encryptedPrivateKey, salt, iv } = user;
+    const { encryptedPrivateKey, encryptedKey, iv, salt } = user;
 
-    const aesKey = CryptoJS.PBKDF2(password, CryptoJS.enc.Hex.parse(salt), {
-      keySize: 256 / 32,
-      iterations: 100000,
-    });
-
-    const decryptedPEM = CryptoJS.AES.decrypt(encryptedPrivateKey, aesKey, {
-      iv: CryptoJS.enc.Hex.parse(iv),
-    }).toString(CryptoJS.enc.Utf8);
-
-    const privateKey = await importPrivateKey(decryptedPEM);
-
-    const publicKeyRes = await axios.get(`http://localhost:5000/api/secure/getUserKey/${user.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const publicKeyPEM = publicKeyRes.data?.publicKey;
-    if (publicKeyPEM) {
-      localStorage.setItem('publicKey', publicKeyPEM);
-    } else {
-      console.warn("Public key not found for sender.");
+    if (!encryptedPrivateKey || !encryptedKey || !iv || !salt) {
+      throw new Error("Missing encryption fields in user record");
     }
 
-    localStorage.setItem('token', token);
-    localStorage.setItem('privateKeyPEM', decryptedPEM);
+    const passwordKeyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(password),
+      "PBKDF2",
+      false,
+      ["deriveKey"]
+    );
 
+    const aesKey = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: base64ToArrayBuffer(salt),
+        iterations: 100000,
+        hash: "SHA-256",
+      },
+      passwordKeyMaterial,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["decrypt"]
+    );
+
+    const privateKeyPEM = await decryptAESGCM(aesKey, encryptedPrivateKey, iv);
+    const privateKey = await importPrivateKey(privateKeyPEM);
+    
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('privateKeyPEM', privateKeyPEM);
+    localStorage.setItem('publicKey', user.publicKey);
     return { token, user, privateKey };
   };
 

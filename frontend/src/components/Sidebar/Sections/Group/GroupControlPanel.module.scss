@@ -1,0 +1,31 @@
+.panel {
+  padding: 16px;
+  background: #2b2b2b;
+  border-radius: 12px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 240px;
+}
+
+button {
+  padding: 8px;
+  border-radius: 6px;
+  background: #444;
+  color: white;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background: #555;
+  }
+}
+
+.delete {
+  background: #ff4d4f;
+
+  &:hover {
+    background: #d9363e;
+  }
+}

@@ -2,15 +2,19 @@ module.exports = (sequelize, DataTypes) => {
   const GroupMember = sequelize.define('GroupMember', {
     groupId: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     userId: {
       type: DataTypes.INTEGER,
-      allowNull: false
-    }
+      allowNull: false,
+    },
+    isOwner: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   }, {
     tableName: 'group_members',
-    timestamps: false
+    timestamps: true,
   });
 
   GroupMember.associate = (models) => {

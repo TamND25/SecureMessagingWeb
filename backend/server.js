@@ -10,6 +10,7 @@ const messageRoutes = require("./api/message");
 const userRoutes = require('./api/user');
 const friendshipRoutes = require('./api/friendship');
 const secureRoutes = require('./api/secure');
+const groupRoutes = require("./api/group");
 const setupSocket = require("./socket");
 
 const fs = require("fs");
@@ -35,6 +36,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/friendship", friendshipRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/secure", secureRoutes);
+app.use("/api/group", groupRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

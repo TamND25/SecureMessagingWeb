@@ -23,6 +23,7 @@ const Login = () => {
       navigate('/home');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
     }
   };
 

@@ -5,16 +5,16 @@ const GroupKey = db.GroupKey || {};
 const { Op } = require("sequelize");
 
 exports.registerKeys = async (req, res) => {
-  const { publicKey, encryptedPrivateKey, salt, iv } = req.body;
+  const { publicKey, encryptedPrivateKey, encryptedKey, iv } = req.body;
   const userId = req.user.id;
 
-  if (!publicKey || !encryptedPrivateKey || !salt || !iv) {
+  if (!publicKey || !encryptedPrivateKey || !encryptedKey || !iv) {
     return res.status(400).json({ error: "Missing key fields" });
   }
 
   try {
     await User.update(
-      { publicKey, encryptedPrivateKey, salt, iv },
+      { publicKey, encryptedPrivateKey, encryptedKey, iv },
       { where: { id: userId } }
     );
     res.status(200).json({ message: "Keys registered successfully" });

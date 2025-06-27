@@ -4,7 +4,7 @@ const db = require("../models");
 const User = db.user;
 
 exports.register = async (req, res) => {
-  const { username, email, password, publicKey, encryptedPrivateKey, salt, iv } = req.body;
+  const { username, email, password, publicKey, encryptedPrivateKey, encryptedKey, salt, iv } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -15,6 +15,7 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       publicKey,
       encryptedPrivateKey,
+      encryptedKey,
       salt,
       iv,
     });
@@ -50,6 +51,7 @@ exports.login = async (req, res) => {
         username: user.username,
         publicKey: user.publicKey,
         encryptedPrivateKey: user.encryptedPrivateKey,
+        encryptedKey: user.encryptedKey,
         salt: user.salt,
         iv: user.iv,
       }
