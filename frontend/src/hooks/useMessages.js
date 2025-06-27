@@ -12,6 +12,7 @@ import {
   encryptMessage,
   importPublicKey,
   encryptAESKeyWithPublicKey,
+  encryptFile
 } from "../utils/secureClient";
 
 const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
@@ -93,25 +94,54 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
   };
 
   const sendFile = async (file) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    // 1. Encrypt file
+    const {
+      encryptedFile,
+      iv,
+      aesKey,
+      originalName,
+      mimeType,
+    } = await encryptFile(file);
+
+    // 2. Get keys
+    const keyRes = await axios.get(`/api/secure/getUserKey/${selectedUser.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const recipientPublicKey = await importPublicKey(keyRes.data?.publicKey);
+    const senderPublicKey = await importPublicKey(localStorage.getItem("publicKey"));
+
+    const encryptedKeyForSender = await encryptAESKeyWithPublicKey(aesKey, senderPublicKey);
+    const encryptedKeyForReceiver = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
+
+    // 3. Create FormData with encrypted file
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", new Blob([encryptedFile]), originalName);
     formData.append("receiverId", selectedUser.id);
+    formData.append("iv", iv);
+    formData.append("encryptedKeyForSender", encryptedKeyForSender);
+    formData.append("encryptedKeyForReceiver", encryptedKeyForReceiver);
+    formData.append("originalName", originalName);
+    formData.append("mimeType", mimeType);
 
-    try {
-      const uploadRes = await axios.post("/api/message/file", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    // 4. Send to backend
+    const uploadRes = await axios.post("/api/message/file", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      const fileMsg = uploadRes.data.messageData;
-      socket.emit("send_message", fileMsg);
-      setMessages((prev) => [...prev, fileMsg]);
-    } catch (err) {
-      console.error("Failed to send file:", err);
-    }
-  };
+    const fileMsg = uploadRes.data.messageData;
+    socket.emit("send_message", fileMsg);
+    setMessages((prev) => [...prev, fileMsg]);
+  } catch (err) {
+    console.error("Encrypted file upload failed:", err);
+  }
+};
 
   const receiveSocketMessage = useCallback((msg) => {
     const isRelevant =

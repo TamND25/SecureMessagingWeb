@@ -1,8 +1,9 @@
 const subtle = window.crypto.subtle;
 
-const arrayBufferToBase64 = (buf) =>
+export const arrayBufferToBase64 = (buf) =>
   btoa(String.fromCharCode(...new Uint8Array(buf)));
-const base64ToArrayBuffer = (b64) =>
+
+export const base64ToArrayBuffer = (b64) =>
   Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer;
 
 function base64ToPEM(b64) {
@@ -114,4 +115,26 @@ export async function decryptAESKeyWithPrivateKey(encryptedKeyB64, privateKey) {
         console.error("Failed to decrypt AES key:", err);
         throw err;
     }
+}
+
+export async function encryptFile(file) {
+  const aesKey = await generateAESKey();
+
+  // Read file as ArrayBuffer
+  const fileBuffer = await file.arrayBuffer();
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    aesKey,
+    fileBuffer
+  );
+
+  return {
+    encryptedFile: new Uint8Array(encrypted),
+    iv: arrayBufferToBase64(iv),
+    aesKey,
+    originalName: file.name,
+    mimeType: file.type,
+  };
 }

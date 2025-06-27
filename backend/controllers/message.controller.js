@@ -38,21 +38,26 @@ exports.sendMessage = async (req, res) => {
 };
 
 exports.uploadFile = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
+  const { receiverId, groupId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType } = req.body;
+  const senderId = req.user.id;
+
+  if (!req.file || (!receiverId && !groupId)) {
+    return res.status(400).json({ error: "Missing file or recipient" });
   }
 
-  const senderId = req.user.id;
-  const { receiverId, groupId } = req.body;
-  const fileUrl = `/uploads/${req.file.filename}`;
-
   try {
+    const fileUrl = `/uploads/${req.file.filename}`;
+
     const message = await Message.create({
       senderId,
       receiverId,
       groupId,
       content: fileUrl,
       type: "file",
+      iv,
+      encryptedKeyForSender: encryptedKeyForSender || null,
+      encryptedKeyForReceiver: encryptedKeyForReceiver || null,
+      mimeType,
       isEdited: false,
       deletedFor: [],
     });
@@ -72,6 +77,7 @@ exports.uploadFile = async (req, res) => {
     res.status(500).json({ error: "Upload failed" });
   }
 };
+
 
 exports.getConversation = async (req, res) => {
   const userId = req.user.id;

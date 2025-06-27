@@ -1,11 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./MessageItem.module.scss";
-
-import {
-  importPrivateKey,
-  decryptAESKeyWithPrivateKey,
-  decryptMessage,
-} from "../../utils/secureClient";
+import useDecryptedMessage from "../../hooks/useDecryptedMessage";
 
 const MessageItem = ({
   message,
@@ -22,6 +17,17 @@ const MessageItem = ({
   const timerRef = useRef(null);
 
   const isMenuOpen = openDropdownId === message.id;
+  const { content, error } = useDecryptedMessage(message, isSender);
+
+  useEffect(() => {
+    setText(content || error || "");
+  }, [content, error]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const handleEditConfirm = () => {
     onEdit(message.id, text);
@@ -42,72 +48,34 @@ const MessageItem = ({
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  const renderFilePreview = (url, mimeType) => {
+    if (!url) return <span>[No preview]</span>;
+    if (!mimeType) return <a href={url}>Download File</a>;
 
-  useEffect(() => {
-    const decryptSecureMessage = async () => {
-      if (message.type !== "text") return;
-
-      const privateKeyPEM = localStorage.getItem("privateKeyPEM");
-
-      if (!privateKeyPEM) {
-        setText("[Private key not found]");   
-        return;
-      }
-
-      try {
-      
-        const privateKey = await importPrivateKey(privateKeyPEM);
-
-        const encryptedKey = isSender
-          ? message.encryptedKeyForSender
-          : message.encryptedKeyForReceiver;
-
-        if (!encryptedKey || !message.iv || !message.content ) {
-          throw new Error("Missing encrypted key, IV, or content");
-        }          
-
-        const aesKey = await decryptAESKeyWithPrivateKey(encryptedKey, privateKey);
-        const decryptedText = await decryptMessage(aesKey, message.content, message.iv);
-        setText(decryptedText);
-        
-      } catch (err) {
-        console.error("Decryption failed:", err);
-        setText("[Unable to decrypt]");
-      }
-    };
-
-    decryptSecureMessage();
-  }, [message, isSender]);
-
-  const renderFilePreview = (url) => {
-    const ext = url.split(".").pop().toLowerCase();
-    const fullUrl = url.startsWith("http")
-      ? url
-      : `http://localhost:5000${url}`;
-
-    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
-      return <img src={fullUrl} alt="shared" className={styles.previewImage} />;
+    if (mimeType.startsWith("image/")) {
+      return <img src={url} alt="Image" className={styles.previewImage} />;
     }
-    if (["mp4", "webm"].includes(ext)) {
+
+    if (mimeType.startsWith("video/")) {
       return (
         <video controls className={styles.previewVideo}>
-          <source src={fullUrl} type={`video/${ext}`} />
+          <source src={url} type={mimeType} />
+          Your browser does not support the video tag.
         </video>
       );
     }
+
+    if (mimeType === "application/pdf") {
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer" className={styles.fileLink}>
+          📄 View PDF
+        </a>
+      );
+    }
+
     return (
-      <a
-        href={fullUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles.fileLink}
-      >
-        {url.split("/").pop()}
+      <a href={url} download={message.originalName || "file"} className={styles.fileLink}>
+        📎 Download File
       </a>
     );
   };
@@ -124,7 +92,7 @@ const MessageItem = ({
     }
 
     if (message.type === "file") {
-      return renderFilePreview(message.content);
+      return renderFilePreview(text, message.mimeType);
     }
 
     return <span>{text}</span>;
@@ -138,28 +106,6 @@ const MessageItem = ({
         </div>
 
         <div className={styles.messageContentWrapper}>
-          {!isSender && (
-            <>
-              <div className={`${styles.bubble} ${styles.received}`}>{renderBubble()}</div>
-              <div className={styles.menuWrapper}>
-                <button
-                  className={styles.menuButton}
-                  onClick={() => {
-                    setOpenDropdownId(isMenuOpen ? null : message.id);
-                    setShowTimerInput(false);
-                  }}
-                >
-                  ⋮
-                </button>
-                {isMenuOpen && (
-                  <div className={`${styles.dropdown} ${styles.dropdownRight}`}>
-                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
           {isSender && (
             <>
               <div className={styles.menuWrapper}>
@@ -195,6 +141,28 @@ const MessageItem = ({
                 )}
               </div>
               <div className={`${styles.bubble} ${styles.sent}`}>{renderBubble()}</div>
+            </>
+          )}
+
+          {!isSender && (
+            <>
+              <div className={`${styles.bubble} ${styles.received}`}>{renderBubble()}</div>
+              <div className={styles.menuWrapper}>
+                <button
+                  className={styles.menuButton}
+                  onClick={() => {
+                    setOpenDropdownId(isMenuOpen ? null : message.id);
+                    setShowTimerInput(false);
+                  }}
+                >
+                  ⋮
+                </button>
+                {isMenuOpen && (
+                  <div className={`${styles.dropdown} ${styles.dropdownRight}`}>
+                    <div onClick={() => onDelete(message.id, false)}>Hide for Me</div>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

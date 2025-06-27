@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     encryptedKeyForSender: { type: DataTypes.TEXT, allowNull: true },
     encryptedKeyForReceiver: { type: DataTypes.TEXT, allowNull: true },
     iv: { type: DataTypes.STRING, allowNull: true },
+    mimeType: { type: DataTypes.STRING, allowNull: true},
   });
 
   Message.associate = models => {
