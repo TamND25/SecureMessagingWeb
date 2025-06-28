@@ -14,7 +14,9 @@ const MessageList = ({ messages, loggedInUserId, onDelete, onEdit, openDropdownI
 
   return (
     <div ref={containerRef} className={styles.messages}>
-      {messages.map((message) => (
+      {messages
+      .filter((m) => !m.deletedFor?.includes(loggedInUserId))
+      .map((message) => (
         <MessageItem
           key={message.id}
           message={message}

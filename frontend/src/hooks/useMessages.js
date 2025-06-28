@@ -148,7 +148,10 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     const isRelevant =
       (msg.senderId === selectedUser.id && msg.receiverId === loggedInUserId) ||
       (msg.senderId === loggedInUserId && msg.receiverId === selectedUser.id);
-    if (isRelevant) {
+
+    const isVisible = !msg.deletedFor?.includes?.(loggedInUserId);
+
+    if (isRelevant && isVisible) {
       setMessages((prev) => [...prev, msg]);
     }
   }, [selectedUser, loggedInUserId]);
