@@ -5,10 +5,10 @@ const User = db.user;
 const { Op } = require("sequelize");
 
 exports.sendMessage = async (req, res) => {
-  const { receiverId, groupId, content, timer, type } = req.body;
+  const { receiverId, content, timer, type } = req.body;
   const senderId = req.user.id;
 
-  if (!content || (!receiverId && !groupId)) {
+  if (!content || (!receiverId )) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
@@ -16,7 +16,6 @@ exports.sendMessage = async (req, res) => {
     const message = await Message.create({
       senderId,
       receiverId,
-      groupId,
       content,
       timer,
       type: type || "text",
@@ -38,10 +37,10 @@ exports.sendMessage = async (req, res) => {
 };
 
 exports.uploadFile = async (req, res) => {
-  const { receiverId, groupId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType } = req.body;
+  const { receiverId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType } = req.body;
   const senderId = req.user.id;
 
-  if (!req.file || (!receiverId && !groupId)) {
+  if (!req.file || (!receiverId )) {
     return res.status(400).json({ error: "Missing file or recipient" });
   }
 
@@ -51,7 +50,6 @@ exports.uploadFile = async (req, res) => {
     const message = await Message.create({
       senderId,
       receiverId,
-      groupId,
       content: fileUrl,
       type: "file",
       iv,
@@ -171,15 +169,22 @@ exports.hardDelete = async (req, res) => {
 
   try {
     const message = await Message.findByPk(id);
-    if (!message || message.senderId !== userId) {
-      return res.status(403).json({ error: "Unauthorized or not found" });
-    }
+    if (!message) return res.status(404).json({ error: "Message not found" });
 
-    await message.destroy();
-    res.json({ message: "Message permanently deleted" });
+    if (message.senderId === userId) {
+      await message.destroy();
+      return res.json({ message: "Message permanently deleted" });
+    } else {
+      const deletedFor = message.deletedFor || [];
+      if (!deletedFor.includes(userId)) {
+        message.deletedFor = [...deletedFor, userId];
+        await message.save();
+      }
+      return res.json({ message: "Message hidden for current user" });
+    }
   } catch (err) {
-    console.error("Error hard-deleting message:", err);
-    res.status(500).json({ error: "Failed to delete message" });
+    console.error("Error hard-deleting or hiding message:", err);
+    res.status(500).json({ error: "Failed to delete or hide message" });
   }
 };
 

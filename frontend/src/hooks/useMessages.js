@@ -25,7 +25,12 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
       const res = await axios.get(`/api/message/conversation/${selectedUser.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMessages(res.data || []);
+
+      const filtered = (res.data || []).filter(
+        (msg) => !msg.deletedFor?.includes(loggedInUserId)
+      );
+
+      setMessages(filtered);
     } catch (err) {
       console.error("Failed to fetch messages:", err);
     }
@@ -97,7 +102,6 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
   try {
     const token = localStorage.getItem("token");
 
-    // 1. Encrypt file
     const {
       encryptedFile,
       iv,
@@ -106,7 +110,6 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
       mimeType,
     } = await encryptFile(file);
 
-    // 2. Get keys
     const keyRes = await axios.get(`/api/secure/getUserKey/${selectedUser.id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -117,7 +120,6 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     const encryptedKeyForSender = await encryptAESKeyWithPublicKey(aesKey, senderPublicKey);
     const encryptedKeyForReceiver = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
 
-    // 3. Create FormData with encrypted file
     const formData = new FormData();
     formData.append("file", new Blob([encryptedFile]), originalName);
     formData.append("receiverId", selectedUser.id);
@@ -127,7 +129,6 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     formData.append("originalName", originalName);
     formData.append("mimeType", mimeType);
 
-    // 4. Send to backend
     const uploadRes = await axios.post("/api/message/file", formData, {
       headers: {
         Authorization: `Bearer ${token}`,
