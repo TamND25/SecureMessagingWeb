@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import MessageItem from "./MessageItem";
+import MessageItem from "../Message/MessageItem";
 import styles from "./MessageList.module.scss";
 
 const MessageList = ({ messages, loggedInUserId, onDelete, onEdit, openDropdownId, setOpenDropdownId }) => {

@@ -177,14 +177,46 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
 
   const editMessage = async (id, newText) => {
     try {
-      const res = await editMessageApi(id, newText, token);
+      const privateKeyPEM = localStorage.getItem("privateKeyPEM");
+      const publicKeyB64 = localStorage.getItem("publicKey");
+      const token = localStorage.getItem("token");
+
+      if (!privateKeyPEM || !publicKeyB64 || !token) {
+        console.error("Missing keys or token for editing message");
+        return;
+      }
+
+      const resKey = await axios.get(`/api/secure/getUserKey/${selectedUser.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const recipientPublicKey = await importPublicKey(resKey.data.publicKey);
+      const senderPublicKey = await importPublicKey(publicKeyB64);
+
+      const aesKey = await generateAESKey();
+      const { ciphertext, iv } = await encryptMessage(aesKey, newText);
+
+      const encryptedKeyForSender = await encryptAESKeyWithPublicKey(aesKey, senderPublicKey);
+      const encryptedKeyForReceiver = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
+
+      const payload = {
+        content: ciphertext,
+        iv,
+        encryptedKeyForSender,
+        encryptedKeyForReceiver,
+      };
+
+      const editRes = await axios.put(`/api/message/${id}/edit`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setMessages((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, ...res.data } : m))
+        prev.map((m) => (m.id === id ? { ...m, ...editRes.data } : m))
       );
     } catch (err) {
       console.error("Edit failed:", err);
     }
   };
+
 
   useEffect(() => {
     fetchMessages();

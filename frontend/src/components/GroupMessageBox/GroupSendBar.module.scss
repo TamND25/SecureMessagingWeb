@@ -1,0 +1,46 @@
+.inputArea {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background: #f9f9f9;
+}
+
+.inputArea input[type="text"] {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-right: 8px;
+}
+
+.sendButton,
+.fileButton {
+  padding: 6px 12px;
+  margin-left: 4px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+}
+
+.fileName {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: red;
+  cursor: pointer;
+}

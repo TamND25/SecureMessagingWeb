@@ -112,17 +112,22 @@ exports.receiveMessages = async (req, res) => {
 
 exports.getGroupKeys = async (req, res) => {
   const groupId = req.params.groupId;
+  const userId = req.user.id;
 
   try {
-    const keys = await GroupKey.findAll({
-      where: { groupId },
-      attributes: ["recipientId", "encryptedKey"],
+    const key = await GroupKey.findOne({
+      where: { groupId, recipientId: userId },
+      attributes: ["encryptedKey"],
     });
 
-    res.json(keys);
+    if (!key) {
+      return res.status(404).json({ error: "Encrypted group key not found for this user" });
+    }
+
+    res.json({ encryptedKey: key.encryptedKey });
   } catch (err) {
     console.error("Group key fetch error:", err);
-    res.status(500).json({ error: "Failed to get group keys" });
+    res.status(500).json({ error: "Failed to get group key" });
   }
 };
 
@@ -130,15 +135,23 @@ exports.saveGroupKeys = async (req, res) => {
   const groupId = req.params.groupId;
   const keyEntries = req.body;
 
+  if (!Array.isArray(keyEntries) || keyEntries.length === 0) {
+    return res.status(400).json({ error: "Missing or invalid key entries" });
+  }
+
   try {
     await Promise.all(
-      keyEntries.map(({ recipientId, encryptedKey }) =>
-        GroupKey.upsert({
+      keyEntries.map(({ recipientId, encryptedKey }) => {
+        if (!recipientId || !encryptedKey) {
+          throw new Error("Each key entry must include recipientId and encryptedKey");
+        }
+
+        return GroupKey.upsert({
           groupId,
           recipientId,
           encryptedKey,
-        })
-      )
+        });
+      })
     );
 
     res.status(200).json({ message: "Group keys saved" });

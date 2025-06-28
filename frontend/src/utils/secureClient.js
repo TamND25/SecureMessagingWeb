@@ -164,3 +164,23 @@ export async function decryptAESGCM(key, ciphertextBase64, ivBase64) {
   const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
   return new TextDecoder().decode(decrypted);
 }
+
+export async function encryptFileWithGroupKey(file, groupAESKey) {
+  if (!groupAESKey) throw new Error("Missing group AES key");
+
+  const fileBuffer = await file.arrayBuffer();
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await subtle.encrypt(
+    { name: "AES-GCM", iv },
+    groupAESKey,
+    fileBuffer
+  );
+
+  return {
+    encryptedFile: new Uint8Array(encrypted),
+    iv: arrayBufferToBase64(iv),
+    originalName: file.name,
+    mimeType: file.type,
+  };
+}

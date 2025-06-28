@@ -1,25 +1,32 @@
 import React, { useEffect, useState } from "react";
 import styles from "./GroupMessageBox.module.scss";
+
 import useFriendData from "../../hooks/useFriendData";
 import useGroupMessages from "../../hooks/useGroupMessages";
-import MessageList from "../MessageBox/MessageList";
-import SendBar from "../MessageBox/SendBar";
+
 import GroupControlPanel from "./GroupControlPanel/GroupControlPanel";
+import GroupSendBar from "./GroupSendBar";
+import GroupMessageItem from "../Message/GroupMessageItem";
 
 const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showControlPanel, setShowControlPanel] = useState(true);
+
   const { users: friends } = useFriendData();
-  const { messages, sendMessage, sendFile, loadMessages, deleteMessage, editMessage } =
-    useGroupMessages(group.id, socket);
+
+  const {
+    messages,
+    sendMessage,
+    sendFile,
+    loadMessages,
+    deleteMessage,
+    editMessage,
+    groupAESKey,
+  } = useGroupMessages(group.id, socket, loggedInUserId);
 
   useEffect(() => {
     loadMessages();
   }, [group.id]);
-
-  const handleSend = async (content, file) => {
-    await sendMessage(content, file);
-  };
 
   return (
     <div className={styles.groupChatWrapper}>
@@ -35,21 +42,31 @@ const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
         </div>
 
         <div className={styles.messages}>
-          <MessageList
-            messages={messages}
-            loggedInUserId={loggedInUserId}
-            onDelete={deleteMessage}
-            onEdit={editMessage}
-            openDropdownId={openDropdownId}
-            setOpenDropdownId={setOpenDropdownId}
-          />
+          {messages
+          .filter(m => !m.hidden)
+          .map((msg) => (
+            <GroupMessageItem
+              key={msg.id}
+              message={msg}
+              groupAESKey={groupAESKey}
+              loggedInUserId={loggedInUserId}
+              onDelete={deleteMessage}
+              onEdit={editMessage}
+              openDropdownId={openDropdownId}
+              setOpenDropdownId={setOpenDropdownId}
+            />
+          ))}
         </div>
 
-        <SendBar sendMessage={handleSend} sendFile={sendFile} />
+        <GroupSendBar sendMessage={sendMessage} sendFile={sendFile} />
       </div>
 
       {showControlPanel && (
-        <GroupControlPanel group={group} loggedInUserId={loggedInUserId} friends={friends}/>
+        <GroupControlPanel
+          group={group}
+          loggedInUserId={loggedInUserId}
+          friends={friends}
+        />
       )}
     </div>
   );

@@ -121,41 +121,9 @@ exports.getConversation = async (req, res) => {
   }
 };
 
-exports.getGroupMessages = async (req, res) => {
-  const userId = req.user.id;
-  const groupId = req.params.groupId;
-
-  try {
-    const messages = await Message.findAll({
-      where: {
-        groupId,
-        [Op.or]: [
-          { deletedFor: null },
-          { deletedFor: { [Op.notContains]: [userId] } },
-        ],
-      },
-      order: [["createdAt", "ASC"]],
-      include: [
-        { model: User, as: "Sender", attributes: ["id", "username"] },
-        { model: Reaction, as: "Reactions" },
-      ],
-    });
-
-    const enrichedMessages = messages.map((msg) => ({
-      ...msg.dataValues,
-      senderName: msg.Sender?.username || "Unknown",
-    }));
-
-    res.json(enrichedMessages);
-  } catch (err) {
-    console.error("Error getting group messages:", err);
-    res.status(500).json({ error: "Failed to get group messages" });
-  }
-};
-
 exports.editMessage = async (req, res) => {
   const { id } = req.params;
-  const { content } = req.body;
+  const { content, iv, encryptedKeyForSender, encryptedKeyForReceiver } = req.body;
   const userId = req.user.id;
 
   try {
@@ -165,9 +133,12 @@ exports.editMessage = async (req, res) => {
     }
 
     message.content = content;
+    message.iv = iv;
+    message.encryptedKeyForSender = encryptedKeyForSender;
+    message.encryptedKeyForReceiver = encryptedKeyForReceiver;
     message.isEdited = true;
-    await message.save();
 
+    await message.save();
     res.json(message);
   } catch (err) {
     console.error("Error editing message:", err);

@@ -1,7 +1,7 @@
 .messageRow {
   display: flex;
   margin: 10px 0;
-  position: relative; // Ensure stacking context
+  position: relative;
   z-index: 0;
 }
 
@@ -57,7 +57,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  z-index: 999; // Force higher priority
+  z-index: 999;
 }
 
 .menuButton {
@@ -76,7 +76,7 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  z-index: 9999; // 💥 MAXIMUM to override all UI (search bar, etc.)
+  z-index: 9999;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;

@@ -21,7 +21,6 @@ const upload = multer({ storage });
 router.post("/send", authenticateToken, messageController.sendMessage);
 router.post("/file", authenticateToken, upload.single("file"), messageController.uploadFile);
 router.get("/conversation/:userId", authenticateToken, messageController.getConversation);
-router.get("/group/:groupId", authenticateToken, messageController.getGroupMessages);
 
 router.put("/:id/edit", authenticateToken, messageController.editMessage);
 
