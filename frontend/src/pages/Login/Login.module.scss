@@ -1,0 +1,138 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fff;
+  }
+  
+  .left-form {
+    width: 40%;
+    max-width: 400px;
+    margin-left: 200px;
+    padding: 2rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .header {
+    margin-bottom: 1rem;
+  }
+  
+  .header .text {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+  
+  .welcome {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+  
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      background: none;
+    }
+  
+    img {
+      margin-right: 0.5rem;
+    }
+  }
+  
+  .password-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.5rem;
+  
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  
+    a {
+      color: #000;
+      text-decoration: none;
+  
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .submit_container {
+    margin-top: 1.5rem;
+  }
+  
+  .submit {
+    background-color: #000;
+    color: #fff;
+    padding: 0.75rem;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+  
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+  
+  .register {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    text-align: center;
+  
+    span {
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 0.25rem;
+  
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .right-image {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+  

@@ -1,0 +1,35 @@
+.userRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.userInfo {
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+.optionsWrapper {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 100px;
+  z-index: 10;
+}
+
+.dropdownItem {
+  padding: 6px 12px;
+  cursor: pointer;
+  &:hover {
+    background-color: #eee;
+  }
+}

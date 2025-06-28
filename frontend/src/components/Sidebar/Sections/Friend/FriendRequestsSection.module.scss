@@ -1,0 +1,46 @@
+@import "./commonSection.module.scss";
+
+.requestsList {
+  margin-top: 5px;
+}
+
+.requestRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 5px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  border: 1px solid #ddd;
+}
+
+.requestText {
+  font-size: 14px;
+  flex: 1;
+  margin-right: 10px;
+  color: #333;
+}
+
+.requestActions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon {
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #007bff;
+  }
+}
+
+.requestCount {
+  font-weight: normal;
+  font-size: 13px;
+  color: #777;
+  margin-left: 4px;
+}

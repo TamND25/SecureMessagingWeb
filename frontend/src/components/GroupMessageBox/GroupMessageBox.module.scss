@@ -1,0 +1,48 @@
+.groupChatWrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.chatWindow {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  border-left: 1px solid #ddd;
+  overflow: hidden;
+  position: relative;
+}
+
+.header {
+  padding: 15px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  min-height: 0;
+}
+
+.toggleBtn {
+  background: none;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #eee;
+  }
+}
