@@ -14,12 +14,21 @@ const groupRoutes = require("./api/group");
 const groupMessageRoutes = require("./api/groupMessage");
 const setupSocket = require("./socket");
 
+const db = require("./models");
 const fs = require("fs");
 const uploadDir = "uploads/";
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+db.sequelize.sync({ alter: true })
+  .then(() => {
+    console.log("Database synced");
+  })
+  .catch((err) => {
+    console.error("Error syncing database:", err);
+  });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -47,10 +56,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use((req, res, next) => {
   console.log(`Request method: ${req.method}, URL: ${req.url}`);
   next();
-});
-
-app.get("/", (req, res) => {
-  res.send("Server is alive");
 });
 
 app.use(express.static(path.join(__dirname, "build")));
