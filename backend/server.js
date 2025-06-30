@@ -28,7 +28,8 @@ const PORT = process.env.PORT || 8080;
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+const allowedOrigin = process.env.CLIENT_URL || "http://localhost:3000";
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());
 
 // Routes
