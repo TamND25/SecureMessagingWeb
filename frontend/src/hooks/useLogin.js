@@ -5,7 +5,7 @@ import {
   base64ToArrayBuffer
 } from '../utils/secureClient';
 
-const API_URL = import.meta.env.REACT_APP_API_URL;
+const API_URL = "";
 
 export const useLogin = () => {
   const loginUser = async ({ username, password }) => {

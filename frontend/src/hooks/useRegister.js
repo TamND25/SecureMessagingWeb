@@ -7,7 +7,7 @@ import {
   arrayBufferToBase64,
 } from '../utils/secureClient';
 
-const API_URL = import.meta.env.REACT_APP_API_URL;
+const API_URL = "";
 
 export const useRegister = () => {
   const registerUser = async ({ username, email, password }) => {
