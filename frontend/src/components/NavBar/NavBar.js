@@ -20,7 +20,7 @@ const NavBar = () => {
                     return;
                 }
 
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/current`, {
+                const res = await axios.get(`${import.meta.env.REACT_APP_API_URL}/api/user/current`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./GroupMessageItem.module.scss";
 import { decryptMessage, base64ToArrayBuffer } from "../../utils/secureClient";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.REACT_APP_API_URL;
 
 const GroupMessageItem = ({
   message,
