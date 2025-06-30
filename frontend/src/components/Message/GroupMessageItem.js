@@ -68,7 +68,7 @@ const GroupMessageItem = ({
             URL.revokeObjectURL(text);
             }
         };
-    }, [message, groupAESKey]);
+    }, [message, groupAESKey, text]);
 
   useEffect(() => {
     return () => {

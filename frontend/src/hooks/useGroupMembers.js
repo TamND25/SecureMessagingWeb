@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 const useGroupMembers = (groupId) => {
@@ -7,7 +7,7 @@ const useGroupMembers = (groupId) => {
 
   const token = localStorage.getItem("token");
 
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       const res = await axios.get(`/api/group/${groupId}/members`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -18,7 +18,7 @@ const useGroupMembers = (groupId) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [groupId, token]);
 
   const promoteOwner = async (userId) => {
     await axios.post(
@@ -49,7 +49,7 @@ const useGroupMembers = (groupId) => {
 
   useEffect(() => {
     if (groupId) fetchMembers();
-  }, [groupId]);
+  }, [groupId, fetchMembers]);
 
   return {
     members,
