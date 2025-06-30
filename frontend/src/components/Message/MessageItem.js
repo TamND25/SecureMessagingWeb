@@ -53,7 +53,7 @@ const MessageItem = ({
     if (!mimeType) return <a href={url}>Download File</a>;
 
     if (mimeType.startsWith("image/")) {
-      return <img src={url} alt="Image" className={styles.previewImage} />;
+      return <img src={url} alt="File preview" className={styles.previewImage} />;
     }
 
     if (mimeType.startsWith("video/")) {

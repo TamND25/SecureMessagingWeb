@@ -10,5 +10,4 @@ module.exports = {
     dialect: 'mysql',
     logging: false
   },
-  // add production and test configs as needed
 };

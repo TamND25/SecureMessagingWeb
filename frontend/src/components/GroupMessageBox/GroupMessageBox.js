@@ -26,7 +26,7 @@ const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
 
   useEffect(() => {
     loadMessages();
-  }, [group.id]);
+  }, [group.id, loadMessages]);
 
   return (
     <div className={styles.groupChatWrapper}>
