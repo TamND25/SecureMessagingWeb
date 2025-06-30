@@ -22,7 +22,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -60,8 +60,8 @@ sequelize.authenticate()
 
     setupSocket(server, require("./models"));
 
-    server.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running at http://0.0.0.0:${PORT}`);
     });
   })
   .catch(err => {
