@@ -26,6 +26,8 @@ const NavBar = () => {
                     },
                 });
 
+                console.log(REACT_APP_API_URL, "API URL");
+
                 setUser(res.data);
             } catch (err) {
                 const errorData = err.response?.data;
