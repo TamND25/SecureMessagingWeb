@@ -22,14 +22,6 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-db.sequelize.sync({ force: true })
-  .then(() => {
-    console.log("Database synced");
-  })
-  .catch((err) => {
-    console.error("Error syncing database:", err);
-  });
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
