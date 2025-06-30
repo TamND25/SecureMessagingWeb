@@ -1,7 +1,6 @@
 import axios from 'axios';
 import {
   decryptAESGCM,
-  decryptAESKeyWithPrivateKey,
   importPrivateKey,
   base64ToArrayBuffer
 } from '../utils/secureClient';
