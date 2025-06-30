@@ -97,7 +97,7 @@ const GroupMessageItem = ({
     }
 
     if (message.mimeType?.startsWith("image/")) {
-      return <img src={text} alt="Image" className={styles.previewImage} />;
+      return <img src={text} alt="File preview" className={styles.previewImage} />;
     }
 
     if (message.mimeType?.startsWith("video/")) {

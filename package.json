@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "install-all": "cd frontend && npm install && cd ../backend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && node server.js"
+  },
+  "dependencies": {
+    "path-to-regexp": "^6.3.0"
+  }
+}

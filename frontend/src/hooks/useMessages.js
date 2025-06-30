@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   softDeleteMessage,
   hardDeleteMessage,
-  editMessage as editMessageApi,
 } from "../services/messageApi";
 
 import {
@@ -34,7 +33,7 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     } catch (err) {
       console.error("Failed to fetch messages:", err);
     }
-  }, [selectedUser, token]);
+  }, [selectedUser, loggedInUserId, token]);
 
   const sendMessage = async (text) => {
     if (!text.trim()) return;

@@ -17,7 +17,7 @@ const CurrentGroupsSection = ({ onSelectGroup, selectedGroupId }) => {
       }
     };
     loadGroups();
-  }, []);
+  }, [fetchGroups]);
 
   const handleLeaveGroup = async (groupId) => {
     if (window.confirm("Are you sure you want to leave this group?")) {
