@@ -22,7 +22,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-db.sequelize.sync({ alter: true })
+db.sequelize.sync({ force: true })
   .then(() => {
     console.log("Database synced");
   })
