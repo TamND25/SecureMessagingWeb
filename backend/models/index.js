@@ -5,7 +5,7 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.user = require("./User.js")(sequelize, DataTypes);
+db.user = require("./user.js")(sequelize, DataTypes);
 db.Friendship = require("./friendship")(sequelize, DataTypes);
 db.message = require("./message")(sequelize, DataTypes);
 db.Reaction = require("./reaction")(sequelize, DataTypes);
