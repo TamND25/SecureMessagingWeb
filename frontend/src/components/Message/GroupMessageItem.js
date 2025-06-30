@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./GroupMessageItem.module.scss";
 import { decryptMessage, base64ToArrayBuffer } from "../../utils/secureClient";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const GroupMessageItem = ({
   message,
   groupAESKey,
@@ -37,7 +39,7 @@ const GroupMessageItem = ({
                     : `/uploads/${message.content}`;
                 const ivBytes = base64ToArrayBuffer(message.iv);
 
-                const response = await fetch(`http://localhost:5000${filePath}`);
+                const response = await fetch(`${API_URL}${filePath}`);
                 if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
                 const encryptedBuffer = await response.arrayBuffer();

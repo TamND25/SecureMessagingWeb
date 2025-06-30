@@ -6,6 +6,8 @@ import {
   base64ToArrayBuffer,
 } from "../utils/secureClient";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const useDecryptedMessage = (message, isSender) => {
   const [content, setContent] = useState("");
   const [error, setError] = useState(null);
@@ -35,7 +37,7 @@ const useDecryptedMessage = (message, isSender) => {
         }
 
         if (message.type === "file") {
-          const response = await fetch(`http://localhost:5000${message.content}`);
+          const response = await fetch(`${API_URL}${message.content}`);
           const encryptedBuffer = await response.arrayBuffer();
 
           const decryptedBuffer = await window.crypto.subtle.decrypt(

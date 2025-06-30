@@ -7,6 +7,8 @@ import {
   arrayBufferToBase64,
 } from '../utils/secureClient';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const useRegister = () => {
   const registerUser = async ({ username, email, password }) => {
     const { publicKey, privateKeyPEM } = await generateRSAKeyPair();
@@ -38,7 +40,7 @@ export const useRegister = () => {
     const publicKeyObj = await importPublicKey(publicKey);
     const encryptedKey = await encryptAESKeyWithPublicKey(aesKey, publicKeyObj);
 
-    const res = await axios.post('http://localhost:5000/api/auth/register', {
+    const res = await axios.post(`${API_URL}/api/auth/register`, {
       username,
       email,
       password,
