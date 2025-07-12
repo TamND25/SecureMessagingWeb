@@ -16,59 +16,66 @@ const GroupMessageItem = ({
   const [showTimerInput, setShowTimerInput] = useState(false);
   const [minutes, setMinutes] = useState("");
   const timerRef = useRef(null);
+  const blobUrlRef = useRef(null); // to track and revoke old blobs
 
   const isSender = message.senderId === loggedInUserId;
   const isMenuOpen = openDropdownId === message.id;
 
-    useEffect(() => {
-        if (!groupAESKey) return;
+  useEffect(() => {
+    if (!groupAESKey || !message) return;
 
-        let isCancelled = false;
+    let isCancelled = false;
 
-        const decrypt = async () => {
-            try {
-            setText("");
-            if (message.type === "text") {
-                const decrypted = await decryptMessage(groupAESKey, message.content, message.iv);
-                if (!isCancelled) setText(decrypted);
-            } else if (message.type === "file") {
-                const filePath = message.content.startsWith("/uploads/")
-                    ? message.content
-                    : `/uploads/${message.content}`;
-                const ivBytes = base64ToArrayBuffer(message.iv);
+    const decrypt = async () => {
+      try {
+        setText("");
 
-                const response = await fetch(`http://localhost:5000${filePath}`);
-                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+        if (message.type === "text") {
+          const decrypted = await decryptMessage(groupAESKey, message.content, message.iv);
+          if (!isCancelled) setText(decrypted);
+        } else if (message.type === "file") {
+          const filePath = message.content.startsWith("/uploads/")
+            ? message.content
+            : `/uploads/${message.content}`;
 
-                const encryptedBuffer = await response.arrayBuffer();
+          const ivBytes = base64ToArrayBuffer(message.iv);
 
-                const decryptedBuffer = await window.crypto.subtle.decrypt(
-                {
-                    name: "AES-GCM",
-                    iv: ivBytes,
-                },
-                groupAESKey,
-                encryptedBuffer
-                );
+          const response = await fetch(`http://localhost:5000${filePath}`);
+          if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
-                const blob = new Blob([decryptedBuffer], { type: message.mimeType });
-                const url = URL.createObjectURL(blob);
-                if (!isCancelled) setText(url);
-            }
-            } catch (err) {
-                console.error("Actual decrypt error:", err);
-                if (!isCancelled) setText("[Unable to decrypt]");
-            }
-        };
+          const encryptedBuffer = await response.arrayBuffer();
+          const decryptedBuffer = await window.crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: ivBytes },
+            groupAESKey,
+            encryptedBuffer
+          );
 
-        decrypt();
+          const blob = new Blob([decryptedBuffer], { type: message.mimeType });
+          const blobUrl = URL.createObjectURL(blob);
 
-        return () => {
-            if (text?.startsWith?.("blob:")) {
-            URL.revokeObjectURL(text);
-            }
-        };
-    }, [message, groupAESKey, text]);
+          if (!isCancelled) {
+            // revoke previous blob if any
+            if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+            blobUrlRef.current = blobUrl;
+            setText(blobUrl);
+          }
+        }
+      } catch (err) {
+        console.error("Actual decrypt error:", err);
+        if (!isCancelled) setText("[Unable to decrypt]");
+      }
+    };
+
+    decrypt();
+
+    return () => {
+      isCancelled = true;
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [message, groupAESKey]);
 
   useEffect(() => {
     return () => {
@@ -92,9 +99,7 @@ const GroupMessageItem = ({
   };
 
   const renderFilePreview = () => {
-    if (!text || text === "[Unable to decrypt]") {
-        return <span>[Unable to decrypt]</span>;
-    }
+    if (!text || text === "[Unable to decrypt]") return <span>[Unable to decrypt]</span>;
 
     if (message.mimeType?.startsWith("image/")) {
       return <img src={text} alt="File preview" className={styles.previewImage} />;
