@@ -13,9 +13,6 @@ const NavBar = () => {
 
     const API_URL = "https://securemessagingweb-production.up.railway.app";
 
-    console.log("ENV:", process.env.REACT_APP_API_URL);
-
-
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -30,8 +27,6 @@ const NavBar = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-
-                console.log(process.env.REACT_APP_API_URL, "API URL");
 
                 setUser(res.data);
             } catch (err) {
