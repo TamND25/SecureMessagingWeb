@@ -74,7 +74,8 @@ exports.uploadFile = async (req, res) => {
       messageData: enrichedMessage,
     });
   } catch (err) {
-    console.error("Upload failed:", err);
+    console.error("Upload failed:", err.message);
+    
     res.status(500).json({ error: "Upload failed" });
   }
 };
