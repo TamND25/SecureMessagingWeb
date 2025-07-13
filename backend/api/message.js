@@ -4,6 +4,7 @@ const path = require("path");
 const router = express.Router();
 const authenticateToken = require("../middleware/authenticateToken");
 const messageController = require("../controllers/message.controller");
+const parser = require("../middleware/cloudinaryUpload");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/send", authenticateToken, messageController.sendMessage);
-router.post("/file", authenticateToken, upload.single("file"), messageController.uploadFile);
+router.post("/file", authenticateToken, parser.single("file"), messageController.uploadFile);
 router.get("/conversation/:userId", authenticateToken, messageController.getConversation);
 
 router.put("/:id/edit", authenticateToken, messageController.editMessage);

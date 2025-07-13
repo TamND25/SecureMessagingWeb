@@ -45,7 +45,7 @@ exports.uploadFile = async (req, res) => {
   }
 
   try {
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = req.file.path;
 
     const message = await Message.create({
       senderId,
