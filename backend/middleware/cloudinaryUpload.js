@@ -13,15 +13,8 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "secure-messages",
     resource_type: "auto",
-    format: async (req, file) => {
-      const ext = file.originalname.split(".").pop();
-      return ext || "bin";
-    },
-    public_id: (req, file) => {
-      const timestamp = Date.now();
-      const cleanName = file.originalname.replace(/\.[^/.]+$/, "");
-      return `${cleanName}_${timestamp}`;
-    },
+    public_id: (req, file) =>
+      file.originalname.split(".")[0] + "_" + Date.now(),
   },
 });
 

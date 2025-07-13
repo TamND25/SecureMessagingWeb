@@ -7,7 +7,15 @@ const messageController = require("../controllers/message.controller");
 const parser = require("../middleware/cloudinaryUpload");
 
 router.post("/send", authenticateToken, messageController.sendMessage);
-router.post("/file", authenticateToken, parser.single("file"), messageController.uploadFile);
+router.post("/file", authenticateToken, (req, res, next) => {
+  parser.single("file")(req, res, (err) => {
+    if (err) {
+      console.error("Cloudinary/Multer error:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    messageController.uploadFile(req, res);
+  });
+});
 router.get("/conversation/:userId", authenticateToken, messageController.getConversation);
 
 router.put("/:id/edit", authenticateToken, messageController.editMessage);
