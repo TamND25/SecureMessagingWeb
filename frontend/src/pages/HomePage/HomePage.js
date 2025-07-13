@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import socket from '../../socket.js'; 
 import styles from './HomePage.module.scss';
 import Navbar from '../../components/NavBar/NavBar.js';
