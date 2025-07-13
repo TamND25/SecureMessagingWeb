@@ -32,7 +32,7 @@ function setupSocket(server, db) {
 
     socket.join(`user:${socket.user.id}`);
 
-    socket.on("privateMessage", async ({ toUserId, content }) => {
+    socket.on("send_message", async ({ toUserId, content }) => {
       if (!toUserId || !content) return;
 
       const message = await db.message.create({
