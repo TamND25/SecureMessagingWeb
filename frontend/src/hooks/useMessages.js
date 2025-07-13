@@ -119,8 +119,10 @@ const useMessages = ({ selectedUser, loggedInUserId, socket }) => {
     const encryptedKeyForSender = await encryptAESKeyWithPublicKey(aesKey, senderPublicKey);
     const encryptedKeyForReceiver = await encryptAESKeyWithPublicKey(aesKey, recipientPublicKey);
 
+    const secureFile = new File([encryptedFile], originalName, { type: mimeType });
+
     const formData = new FormData();
-    formData.append("file", new Blob([encryptedFile]), originalName);
+    formData.append("file", secureFile);
     formData.append("receiverId", selectedUser.id);
     formData.append("iv", iv);
     formData.append("encryptedKeyForSender", encryptedKeyForSender);

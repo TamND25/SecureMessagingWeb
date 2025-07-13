@@ -92,9 +92,10 @@ const useGroupMessages = (groupId, socket, loggedInUserId) => {
         originalName,
         mimeType,
       } = await encryptFileWithGroupKey(file, groupAESKey);
-
+      
+      const secureFile = new File([encryptedFile], originalName, { type: mimeType });
       const formData = new FormData();
-      formData.append("file", new Blob([encryptedFile], { type: mimeType }), originalName);
+      formData.append("file", secureFile);  
       formData.append("iv", iv);
       formData.append("originalName", originalName);
       formData.append("mimeType", mimeType);
