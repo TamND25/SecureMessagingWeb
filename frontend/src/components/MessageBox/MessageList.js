@@ -2,8 +2,16 @@ import React, { useRef, useEffect } from "react";
 import MessageItem from "../Message/MessageItem";
 import styles from "./MessageList.module.scss";
 
-const MessageList = ({ messages, loggedInUserId, onDelete, onEdit, openDropdownId, setOpenDropdownId }) => {
+const MessageList = ({
+  messages,
+  loggedInUserId,
+  onDelete,
+  onEdit,
+  openDropdownId,
+  setOpenDropdownId,
+}) => {
   const containerRef = useRef(null);
+  const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setOpenDropdownId(null);
@@ -13,27 +21,24 @@ const MessageList = ({ messages, loggedInUserId, onDelete, onEdit, openDropdownI
   }, [setOpenDropdownId]);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
+    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
     <div ref={containerRef} className={styles.messages}>
       {messages
-      .filter((m) => !m.deletedFor?.includes(loggedInUserId))
-      .map((message) => (
-        <MessageItem
-          key={message.id}
-          message={message}
-          isSender={message.senderId === loggedInUserId}
-          onDelete={onDelete}
-          onEdit={onEdit}
-          openDropdownId={openDropdownId}
-          setOpenDropdownId={setOpenDropdownId}
-        />
-      ))}
+        .filter((m) => !m.deletedFor?.includes(loggedInUserId))
+        .map((message) => (
+          <MessageItem
+            key={message.id}
+            message={message}
+            isSender={message.senderId === loggedInUserId}
+            onDelete={onDelete}
+            onEdit={onEdit}
+            openDropdownId={openDropdownId}
+            setOpenDropdownId={setOpenDropdownId}
+          />
+        ))}
       <div ref={endOfMessagesRef} />
     </div>
   );
