@@ -34,6 +34,7 @@ const MessageList = ({ messages, loggedInUserId, onDelete, onEdit, openDropdownI
           setOpenDropdownId={setOpenDropdownId}
         />
       ))}
+      <div ref={endOfMessagesRef} />
     </div>
   );
 };
