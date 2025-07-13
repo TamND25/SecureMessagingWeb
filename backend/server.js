@@ -66,6 +66,13 @@ sequelize.authenticate()
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running at http://0.0.0.0:${PORT}`);
     });
+
+    console.log("Cloudinary ENV:", {
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+      CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+    });
+
   })
   .catch(err => {
     console.error('DB connection error:', err);

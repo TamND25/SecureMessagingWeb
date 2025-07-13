@@ -39,7 +39,7 @@ const MessageList = ({
             setOpenDropdownId={setOpenDropdownId}
           />
         ))}
-      <div ref={endOfMessagesRef} style={{ height: "1px" }}/>
+      <div ref={endOfMessagesRef} style={{ height: "3px" }}/>
     </div>
   );
 };
