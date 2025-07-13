@@ -9,6 +9,10 @@
     flex: 1;
     height: 100%;
     overflow: hidden;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
   }
 
   .chatArea {
@@ -18,11 +22,21 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+
+    @media (max-width: 768px) {
+      padding: 10px;
+    }
   }
 
   .placeholder {
     color: #777;
     font-size: 1.2em;
     padding-top: 50px;
+
+    @media (max-width: 768px) {
+      font-size: 1em;
+      padding-top: 20px;
+      text-align: center;
+    }
   }
 }
