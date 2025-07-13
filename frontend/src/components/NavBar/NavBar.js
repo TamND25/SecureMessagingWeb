@@ -25,7 +25,7 @@ const NavBar = () => {
                     return;
                 }
 
-                const res = await axios.get(`${process.env.API_URL}/api/user/current`, {
+                const res = await axios.get(`${API_URL}/api/user/current`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
