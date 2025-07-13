@@ -10,7 +10,9 @@ const NavBar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState(null);
     const dropdownRef = useRef();
-    
+
+    const API_URL = "https://securemessagingweb-production.up.railway.app";
+
     console.log("ENV:", process.env.REACT_APP_API_URL);
 
 
@@ -23,7 +25,7 @@ const NavBar = () => {
                     return;
                 }
 
-                const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/current`, {
+                const res = await axios.get(`${process.env.API_URL}/api/user/current`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
