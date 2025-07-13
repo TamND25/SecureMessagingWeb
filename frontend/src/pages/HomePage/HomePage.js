@@ -13,6 +13,14 @@ const HomePage = () => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   useAuthCheck();
 
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   const {
     users,
     requests,
