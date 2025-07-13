@@ -41,7 +41,7 @@ function setupSocket(server, db) {
         content,
       });
 
-      io.to(`user:${toUserId}`).emit("newMessage", {
+      io.to(`user:${toUserId}`).emit("receive_message", {
         from: socket.user.id,
         content,
         createdAt: message.createdAt,

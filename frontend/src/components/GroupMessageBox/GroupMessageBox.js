@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styles from "./GroupMessageBox.module.scss";
 
 import useFriendData from "../../hooks/useFriendData";
@@ -13,6 +13,7 @@ const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
   const [showControlPanel, setShowControlPanel] = useState(true);
 
   const { users: friends } = useFriendData();
+  const containerRef = useRef(null); // scroll container
 
   const {
     messages,
@@ -28,6 +29,12 @@ const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
     loadMessages();
   }, [group.id, loadMessages]);
 
+  // Scroll to bottom when messages update
+  useEffect(() => {
+    const el = containerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages]);
+
   return (
     <div className={styles.groupChatWrapper}>
       <div className={styles.chatWindow}>
@@ -41,21 +48,21 @@ const GroupMessageBox = ({ group, socket, loggedInUserId }) => {
           </button>
         </div>
 
-        <div className={styles.messages}>
+        <div className={styles.messages} ref={containerRef}>
           {messages
-          .filter(m => !m.hidden)
-          .map((msg) => (
-            <GroupMessageItem
-              key={msg.id}
-              message={msg}
-              groupAESKey={groupAESKey}
-              loggedInUserId={loggedInUserId}
-              onDelete={deleteMessage}
-              onEdit={editMessage}
-              openDropdownId={openDropdownId}
-              setOpenDropdownId={setOpenDropdownId}
-            />
-          ))}
+            .filter((m) => !m.hidden)
+            .map((msg) => (
+              <GroupMessageItem
+                key={msg.id}
+                message={msg}
+                groupAESKey={groupAESKey}
+                loggedInUserId={loggedInUserId}
+                onDelete={deleteMessage}
+                onEdit={editMessage}
+                openDropdownId={openDropdownId}
+                setOpenDropdownId={setOpenDropdownId}
+              />
+            ))}
         </div>
 
         <GroupSendBar sendMessage={sendMessage} sendFile={sendFile} />
