@@ -45,6 +45,9 @@ exports.uploadFile = async (req, res) => {
     return res.status(500).json({ error: "Upload failed — no file URL" });
   }
 
+  console.log("Body fields:", { receiverId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType });
+  console.log("req.file =", req.file);
+
   if (!req.file || (!receiverId )) {
     return res.status(400).json({ error: "Missing file or recipient" });
   }
@@ -75,7 +78,7 @@ exports.uploadFile = async (req, res) => {
     });
   } catch (err) {
     console.error("Upload failed:", err.message);
-    
+
     res.status(500).json({ error: "Upload failed" });
   }
 };
