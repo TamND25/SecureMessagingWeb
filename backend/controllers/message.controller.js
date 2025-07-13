@@ -39,8 +39,11 @@ exports.sendMessage = async (req, res) => {
 exports.uploadFile = async (req, res) => {
   const { receiverId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType } = req.body;
   const senderId = req.user.id;
-  const fileUrl = req.file.path;
-  console.log("Cloudinary file path:", req.file?.path);
+  const fileUrl = req.file?.path || req.file?.secure_url;
+  if (!fileUrl) {
+    console.error("No valid file path returned from Cloudinary");
+    return res.status(500).json({ error: "Upload failed — no file URL" });
+  }
 
   if (!req.file || (!receiverId )) {
     return res.status(400).json({ error: "Missing file or recipient" });

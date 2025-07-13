@@ -21,7 +21,7 @@ const MessageList = ({
   }, [setOpenDropdownId]);
 
   useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth", block: "end"});
   }, [messages]);
 
   return (
@@ -39,7 +39,7 @@ const MessageList = ({
             setOpenDropdownId={setOpenDropdownId}
           />
         ))}
-      <div ref={endOfMessagesRef} />
+      <div ref={endOfMessagesRef} style={{ height: "1px" }}/>
     </div>
   );
 };
