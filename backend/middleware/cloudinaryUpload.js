@@ -13,4 +13,9 @@ const storage = new CloudinaryStorage({
 
 const parser = multer({ storage });
 
+parser.single("file").handle = (...args) => {
+  console.log(">>> parser hit");
+  return multer({ storage }).single("file")(...args);
+};
+
 module.exports = parser;
