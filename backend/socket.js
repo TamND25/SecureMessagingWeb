@@ -32,20 +32,11 @@ function setupSocket(server, db) {
 
     socket.join(`user:${socket.user.id}`);
 
-    socket.on("send_message", async ({ toUserId, content }) => {
-      if (!toUserId || !content) return;
+    socket.on("send_message", (msg) => {
+      const toUserId = msg.receiverId;
+      if (!toUserId || !msg.content) return;
 
-      const message = await db.message.create({
-        senderId: socket.user.id,
-        receiverId: toUserId,
-        content,
-      });
-
-      io.to(`user:${toUserId}`).emit("receive_message", {
-        from: socket.user.id,
-        content,
-        createdAt: message.createdAt,
-      });
+      io.to(`user:${toUserId}`).emit("receive_message", msg);
     });
 
     socket.on("disconnect", () => {

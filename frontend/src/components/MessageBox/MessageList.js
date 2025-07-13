@@ -6,18 +6,18 @@ const MessageList = ({ messages, loggedInUserId, onDelete, onEdit, openDropdownI
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
-  }, [messages]);
-
-  useEffect(() => {
     const handleScroll = () => setOpenDropdownId(null);
     const current = containerRef.current;
     current?.addEventListener("scroll", handleScroll);
     return () => current?.removeEventListener("scroll", handleScroll);
   }, [setOpenDropdownId]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages]);
 
   return (
     <div ref={containerRef} className={styles.messages}>

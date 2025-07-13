@@ -39,14 +39,14 @@ exports.sendMessage = async (req, res) => {
 exports.uploadFile = async (req, res) => {
   const { receiverId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType } = req.body;
   const senderId = req.user.id;
+  const fileUrl = req.file.path;
+  console.log("Cloudinary file path:", req.file?.path);
 
   if (!req.file || (!receiverId )) {
     return res.status(400).json({ error: "Missing file or recipient" });
   }
 
   try {
-    const fileUrl = req.file.path;
-
     const message = await Message.create({
       senderId,
       receiverId,
