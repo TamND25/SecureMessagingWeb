@@ -56,6 +56,10 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
+app.use((err, req, res, next) => {
+  console.error("Unhandled server error:", err);
+  res.status(500).json({ error: "Internal Server Error", details: err.message });
+});
 
 sequelize.authenticate()
   .then(() => {

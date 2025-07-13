@@ -1,21 +1,29 @@
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
-const cloudinary = require("../utils/cloudinary");
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "secure-messaging-files",
-    allowed_formats: ["jpg", "png", "pdf", "mp4", "webm"],
+    folder: "secure-messages",
     resource_type: "auto",
+    format: async (req, file) => {
+      const ext = file.originalname.split(".").pop();
+      return ext || "bin";
+    },
+    public_id: (req, file) => {
+      const timestamp = Date.now();
+      const cleanName = file.originalname.replace(/\.[^/.]+$/, "");
+      return `${cleanName}_${timestamp}`;
+    },
   },
 });
 
 const parser = multer({ storage });
-
-parser.single("file").handle = (...args) => {
-  console.log(">>> parser hit");
-  return multer({ storage }).single("file")(...args);
-};
-
 module.exports = parser;

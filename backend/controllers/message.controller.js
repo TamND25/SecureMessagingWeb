@@ -37,6 +37,7 @@ exports.sendMessage = async (req, res) => {
 };
 
 exports.uploadFile = async (req, res) => {
+  console.log("==== uploadFile controller hit ====");
   const { receiverId, iv, encryptedKeyForSender, encryptedKeyForReceiver, mimeType } = req.body;
   const senderId = req.user.id;
   const fileUrl = req.file?.path || req.file?.secure_url;
