@@ -40,7 +40,13 @@ const GroupMessageItem = ({
 
           const ivBytes = base64ToArrayBuffer(message.iv);
 
-          const response = await fetch(`http://localhost:5000${filePath}`);
+          const BASE_URL =
+            import.meta?.env?.VITE_API_URL ||
+            process.env.REACT_APP_API_URL ||
+            window.location.origin;
+
+          const response = await fetch(`${BASE_URL}${filePath}`);
+
           if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
           const encryptedBuffer = await response.arrayBuffer();
