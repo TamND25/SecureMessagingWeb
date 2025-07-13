@@ -10,6 +10,9 @@ const NavBar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState(null);
     const dropdownRef = useRef();
+    
+    console.log("ENV:", process.env.REACT_APP_API_URL);
+
 
     useEffect(() => {
         const fetchUser = async () => {
