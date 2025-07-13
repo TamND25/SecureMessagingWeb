@@ -21,7 +21,7 @@ const NavBar = () => {
                     console.log("No token found");
                     return;
                 }
-
+                // Fetch user data using the token
                 const res = await axios.get(`${API_URL}/api/user/current`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
